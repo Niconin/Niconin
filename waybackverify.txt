@@ -1,6 +1,6 @@
 Exclusion Request
 DOMAIN: 2co.jp (and all subdomains)
-TIME PERIOD: 2014 to 2020
+TIME PERIOD: 2004 to 2020
 
 *I have sent you a request via email: www@2co.jp
 
