@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html lang="ja">
- <html>
-  <head>
-   <meta charset="UTF-8">
-   <meta name="description" content="YouTubeチャンネル「2coninのゆっくり実況所」へ簡単にアクセスできます！他にもこのチャンネルのおすすめ動画を紹介しています！">
-   <title>2coninのゆっくり実況所公式クイックアクセスサイト</title>
-   <link rel="icon" href="favicon.png">
-   <link rel="preconnect" href="https://fonts.googleapis.com">
-   <link rel="preconnect" href="https://fonts.gstatic.com">
-   <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300" rel="stylesheet">
-   <style>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="YouTubeチャンネル「2coninのゆっくり実況所」へ簡単にアクセスできます！他にもこのチャンネルのおすすめ動画を紹介しています！">
+    <title>2coninのゆっくり実況所公式クイックアクセスサイト</title>
+    <link rel="icon" href="favicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300" rel="stylesheet">
+    <style>
     <!--
     body      { color: #008000; text-decoration: none; }
     body      { font-family: 'Kiwi Maru', serif; }
@@ -41,28 +42,28 @@
     <hr>
     <span id="viewTime"></span>
     <script type="text/javascript">
-     timer = setInterval('clock()',1000); //時刻の更新
-     
-     function clock() {
-      document.getElementById("viewTime").innerHTML = getNow();
-     }
-     
-     function getNow() {
-      var now = new Date();
-      var year = now.getFullYear();
-      var mon = now.getMonth()+1; //１を足すこと
-      var day = now.getDate();
-      var hour = now.getHours();
-      var min = now.getMinutes();
-      var sec = now.getSeconds();
-      var you = now.getDay(); //曜日
-      
-      //曜日の配列（日～土）
-      var youbi = new Array("日","月","火","水","木","金","土");
-      //出力用
-      var s = year + "年" + mon + "月" + day + "日(" + youbi[you] + ")"+ hour + "時" + min + "分" + sec + "秒" ;
-      return s;
-     }
+        timer = setInterval('clock()', 1000); //時刻の更新
+
+        function clock() {
+            document.getElementById("viewTime").innerHTML = getNow();
+        }
+
+        function getNow() {
+            var now = new Date();
+            var year = now.getFullYear();
+            var mon = now.getMonth() + 1; //１を足すこと
+            var day = now.getDate();
+            var hour = now.getHours();
+            var min = now.getMinutes();
+            var sec = now.getSeconds();
+            var you = now.getDay(); //曜日
+
+            //曜日の配列（日～土）
+            var youbi = new Array("日", "月", "火", "水", "木", "金", "土");
+            //出力用
+            var s = year + "年" + mon + "月" + day + "日(" + youbi[you] + ")" + hour + "時" + min + "分" + sec + "秒";
+            return s;
+        }
     </script>
     <br>
     <a href="https://x.com/2conin9G">𝕏:@2conin9G</a>

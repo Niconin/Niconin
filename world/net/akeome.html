@@ -1,61 +1,64 @@
 <!DOCTYPE html>
 <html lang="ja">
-  <head>
-    <meta charset="UTF-8">
-    <title>あけおめことよろ</title>
-  </head>
-  <body background="1.png">
-    <script>
-      alert('2022年ありがとうございました！2023年もよろしくおねがいします！');
-    </script>
-    <div style="text-align: center">
-      <img src="あけおめ.png" alt="あけおめことよろ">
-      <br>
-      <font size="10" color="#004000" face="ＭＳ Ｐ明朝">あけことサイトへようこそ。</font>
-      <marquee behavior="alternate" direction="left" height="300">
-        <marquee direction="up">
-          <img src="ことよろ.png">
-        </marquee>
+
+<head>
+  <meta charset="UTF-8">
+  <title>あけおめことよろ</title>
+</head>
+
+<body background="1.png">
+  <script>
+    alert('2022年ありがとうございました！2023年もよろしくおねがいします！');
+  </script>
+  <div style="text-align: center">
+    <img src="あけおめ.png" alt="あけおめことよろ">
+    <br>
+    <font size="10" color="#004000" face="ＭＳ Ｐ明朝">あけことサイトへようこそ。</font>
+    <marquee behavior="alternate" direction="left" height="300">
+      <marquee direction="up">
+        <img src="ことよろ.png">
       </marquee>
-      <hr>
-      <b>元になったサイトたち 
+    </marquee>
+    <hr>
+    <b>元になったサイトたち
+      <br>
+      <a href="https://www.2co.jp/world/ch/">2coninのゆっくり実況所公式クイックアクセスサイト</a>
+      <br>
+      <a href="https://www.2co.jp/world/net/">net教会</a>
+      <br>
+      <a href="https://www.mcdonald.jp/">ドナルド・マクドナルドを信仰する会(現名称:ドナルド教非公式ホームページ)</a>
+      <br>
+      <h4>現在の時間
         <br>
-        <a href="https://www.2co.jp/world/ch/">2coninのゆっくり実況所公式クイックアクセスサイト</a>
-        <br>
-        <a href="https://www.2co.jp/world/net/">net教会</a>
-        <br>
-        <a href="https://www.mcdonald.jp/">ドナルド・マクドナルドを信仰する会(現名称:ドナルド教非公式ホームページ)</a>
-        <br>
-        <h4>現在の時間
-          <br>
-          <span id="viewTime"></span>
-      </b>
+        <span id="viewTime"></span>
+    </b>
     </h4>
-      <script type="text/javascript">
-        timer = setInterval('clock()',1000); //時刻の更新
-        
-        function clock() {
-          document.getElementById("viewTime").innerHTML = getNow();
-        }
-        
-        function getNow() {
-          var now = new Date();
-          var year = now.getFullYear();
-          var mon = now.getMonth()+1; //１を足すこと
-          var day = now.getDate();
-          var hour = now.getHours();
-          var min = now.getMinutes();
-          var sec = now.getSeconds();
-          var you = now.getDay(); //曜日
-          
-          //曜日の配列（日～土）
-          var youbi = new Array("日","月","火","水","木","金","土");
-          //出力用
-          var s = year + "年" + mon + "月" + day + "日(" + youbi[you] + ")"+ hour + "時" + min + "分" + sec + "秒" ;
-          return s;
-        }
-      </script>
-      <font color="#808080">Nicoworld Project</font>
-    </div>
-  </body>
+    <script type="text/javascript">
+      timer = setInterval('clock()', 1000); //時刻の更新
+
+      function clock() {
+        document.getElementById("viewTime").innerHTML = getNow();
+      }
+
+      function getNow() {
+        var now = new Date();
+        var year = now.getFullYear();
+        var mon = now.getMonth() + 1; //１を足すこと
+        var day = now.getDate();
+        var hour = now.getHours();
+        var min = now.getMinutes();
+        var sec = now.getSeconds();
+        var you = now.getDay(); //曜日
+
+        //曜日の配列（日～土）
+        var youbi = new Array("日", "月", "火", "水", "木", "金", "土");
+        //出力用
+        var s = year + "年" + mon + "月" + day + "日(" + youbi[you] + ")" + hour + "時" + min + "分" + sec + "秒";
+        return s;
+      }
+    </script>
+    <font color="#808080">Nicoworld Project</font>
+  </div>
+</body>
+
 </html>
