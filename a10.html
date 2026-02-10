@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Chess Final - Permanent Hint</title>
+<link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+<style>
+  /* --- 基本レイアウト --- */
+  body { margin:0; font-family:'Helvetica Neue', sans-serif; background:linear-gradient(135deg, #1e3c72, #2a5298); height:100vh; display:flex; justify-content:center; align-items:center; overflow:hidden; }
+  .box { background:rgba(255,255,255,0.95); padding:20px; border-radius:15px; box-shadow:0 20px 50px rgba(0,0,0,0.5); display:flex; gap:25px; max-width:900px; width:95%; height: 85vh; position:relative; box-sizing: border-box; }
+  
+  /* --- 盤面・情報エリア --- */
+  .board-section { flex: 2; display: flex; flex-direction: column; justify-content: center; }
+  .board-wrap { border:8px solid #34495e; border-radius:4px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+  .info-section { flex: 1; display:flex; flex-direction:column; align-items:center; min-width:280px; overflow-y: auto; padding-right:5px; }
+  
+  /* --- キャラクター --- */
+  .mascot { font-size:70px; background:#fff; width:100px; height:100px; border-radius:50%; display:flex; justify-content:center; align-items:center; border:5px solid #ccc; margin-bottom:15px; transition:all 0.3s; }
+  .turn-w { border-color: #f1c40f; box-shadow: 0 0 20px rgba(241, 196, 15, 0.6); transform: scale(1.05); }
+  .turn-b { border-color: #8e44ad; box-shadow: 0 0 20px rgba(142, 68, 173, 0.6); transform: scale(0.95); grayscale: 100%; }
+
+  /* --- 吹き出し --- */
+  .bubble { position:relative; background:#fff; border:3px solid #3498db; border-radius:12px; padding:15px; width:100%; box-sizing:border-box; margin-bottom:10px; min-height:80px; font-size:14px; line-height:1.5; flex-shrink: 0; }
+  .bubble::after { content:''; position:absolute; top:-15px; left:50%; transform:translateX(-50%); border:10px solid transparent; border-bottom-color:#3498db; }
+
+  /* --- ルールメモ --- */
+  .rule-memo { background: #ecf0f1; padding: 10px; border-radius: 8px; font-size: 12px; color: #555; width: 100%; box-sizing: border-box; margin-bottom: 10px; border-left: 4px solid #95a5a6; }
+  
+  /* --- ボタン --- */
+  .btn-group { width: 100%; display: flex; flex-direction: column; gap: 10px; margin-top: auto; }
+  .btn { border:none; padding:12px; border-radius:8px; font-weight:bold; cursor:pointer; width:100%; color: white; transition: 0.2s; }
+  .btn-hint { background: #f39c12; } .btn-hint:hover { background: #d35400; }
+  .btn-reset { background: #e74c3c; } .btn-reset:hover { background: #c0392b; }
+
+  /* --- メニュー --- */
+  .overlay { position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(30,60,114,0.98); z-index:100; display:flex; flex-direction:column; justify-content:center; align-items:center; color:#fff; border-radius:15px; transition: opacity 0.3s; }
+  .hidden { display: none !important; opacity: 0; }
+  .menu-btn { background:#f1c40f; color:#333; margin:10px; padding:15px 40px; border:none; border-radius:30px; font-size:18px; font-weight:bold; cursor:pointer; width: 220px; }
+
+  /* --- マス目のハイライト --- */
+  .highlight-move { box-shadow: inset 0 0 0 4px rgba(46, 204, 113, 0.6); border-radius: 50%; }
+  .highlight-capture { box-shadow: inset 0 0 0 4px rgba(231, 76, 60, 0.8); background: rgba(231, 76, 60, 0.2); }
+  
+  /* ヒント用ハイライト (点灯しっぱなし) */
+  .highlight-hint { 
+    background-color: rgba(255, 255, 0, 0.6) !important; 
+    box-shadow: 0 0 15px #f1c40f;
+  }
+
+  @media(max-width:768px){ .box{ flex-direction:column; height: auto; overflow-y: scroll; } .info-section { order: -1; } .board-wrap { width: 100%; } }
+</style>
+</head>
+<body>
+
+<div class="box">
+  <div id="menu" class="overlay">
+    <h1>♚ AI Chess</h1>
+    <a href="a115.html">Ver.1.1.5(最新)へ</a>
+    <p>強さを選んでね</p>
+    <select id="level" style="padding:10px; margin:10px; font-size:16px; border-radius:5px;">
+      <option value="0">🌱 初級 (手加減)</option>
+      <option value="1" selected>🐥 中級 (ふつう)</option>
+      <option value="2">🦅 上級 (つよい)</option>
+      <option value="3">🐉 超級 (最強)</option>
+    </select>
+    <button class="menu-btn" onclick="startGame('player')">🎮 自分で対戦</button>
+    <button class="menu-btn" onclick="startGame('auto')">📺 観戦モード</button>
+  </div>
+
+  <div class="board-section">
+    <div class="board-wrap"><div id="board" style="width:100%"></div></div>
+  </div>
+
+  <div class="info-section">
+    <div class="mascot turn-w" id="face">🧙‍♂️</div>
+    <div id="status" style="font-weight:bold; margin-bottom:5px;">準備完了</div>
+    <div class="bubble" id="msg">レベルを選んでスタート！</div>
+    
+    <div class="rule-memo">
+      <b>📝 ルールメモ</b><br>
+      ♟ ポーン: 前へ (敵は斜め)<br>
+      ♜ ルーク: 縦横ビーム<br>
+      ♝ ビショップ: 斜めビーム<br>
+      ♞ ナイト: L字ジャンプ<br>
+      ♛ クイーン: 最強(縦横斜め)<br>
+      ♚ キング: 王様(取られたら負け)
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-hint" onclick="showHint()">💡 ヒント</button>
+      <button class="btn btn-reset" onclick="location.reload()">🏠 メニューへ</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+<script>
+const game = new Chess();
+let board = null, aiLevel = 1, isAuto = false, autoTimer = null;
+const ui = { face: $('#face'), msg: $('#msg'), status: $('#status') };
+
+const pieceTheme = p => {
+  const c = p[0]=='w'?'#fff':'#000', s = p[0]=='w'?'#000':'#fff';
+  const sym = {'P':'♙','N':'♘','B':'♗','R':'♖','Q':'♕','K':'♔','p':'♟','n':'♞','b':'♝','r':'♜','q':'♛','k':'♚'}[p[1]] || '♟';
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><text x="50%" y="58%" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="50" fill="${c}" stroke="${s}" stroke-width="1.5">${sym}</text></svg>`);
+};
+
+function startGame(mode) {
+  isAuto = (mode === 'auto');
+  aiLevel = parseInt($('#level').val());
+  $('#menu').addClass('hidden');
+  
+  board = Chessboard('board', {
+    draggable: !isAuto,
+    position: 'start',
+    pieceTheme: pieceTheme,
+    onDragStart: onDragStart,
+    onDrop: onDrop,
+    onSnapEnd: () => board.position(game.fen()),
+    onMouseoutSquare: removeHighlights // マウスが外れてもヒントは消さない（操作開始時に消える）
+  });
+  
+  $(window).resize(board.resize);
+  updateBoardState(isAuto ? "観戦モード開始！" : "対局開始！白の番だよ。", "🧙‍♂️");
+  if(isAuto) setTimeout(autoPlayLoop, 1000);
+}
+
+function onDragStart (source, piece) {
+  if (game.game_over() || isAuto) return false;
+  if (game.turn() === 'b' || piece.search(/^b/) !== -1) return false;
+  const moves = game.moves({ square: source, verbose: true });
+  if (moves.length === 0) return false;
+  
+  // ドラッグ開始時に、ヒントを含むすべてのハイライトを消す
+  removeHighlights();
+  
+  moves.forEach(m => highlightSquare(m.to, m.flags.includes('c') ? 'highlight-capture' : 'highlight-move'));
+}
+
+function onDrop (source, target) {
+  removeHighlights();
+  const move = game.move({ from: source, to: target, promotion: 'q' });
+  if (move === null) return 'snapback';
+  updateBoardState(null);
+  if (!game.game_over()) window.setTimeout(makeAiMove, 500);
+}
+
+function makeAiMove() {
+  const moves = game.moves({ verbose: true });
+  if (moves.length === 0) return;
+  
+  // 評価関数
+  const scoreMove = m => (m.flags.includes('c') ? 10 : 0) + (m.san.includes('+') ? 5 : 0) + (['d4','e4'].includes(m.to) ? 2 : 0);
+  moves.sort((a, b) => scoreMove(b) - scoreMove(a));
+  
+  // レベル別ロジック
+  const randomness = [6, 3, 1, 0];
+  const range = randomness[aiLevel];
+  
+  const idx = Math.floor(Math.random() * Math.min(moves.length, range + 1));
+  game.move(moves[idx].san);
+  board.position(game.fen());
+  updateBoardState(null);
+}
+
+function autoPlayLoop() {
+  if (game.game_over()) return;
+  makeAiMove();
+  if (!game.game_over()) autoTimer = setTimeout(autoPlayLoop, 1500);
+}
+
+// 【修正】ヒント機能：点灯しっぱなし（自動消去なし）
+function showHint() {
+  if(game.game_over()) return;
+  const moves = game.moves({ verbose: true });
+  const scoreMove = m => (m.flags.includes('c') ? 10 : 0) + (m.san.includes('+') ? 5 : 0) + (['d4','e4'].includes(m.to) ? 2 : 0);
+  moves.sort((a, b) => scoreMove(b) - scoreMove(a));
+  const hint = moves[0];
+  if(!hint) { ui.msg.text("ヒントが出せないよ！"); return; }
+
+  // 既存のハイライトを消してから新しいヒントを表示
+  removeHighlights();
+  highlightSquare(hint.from, 'highlight-hint');
+  highlightSquare(hint.to, 'highlight-hint');
+  
+  // メッセージのみ更新。setTimeoutによる削除は行わない。
+  ui.msg.html(`ヒント: <b style="color:#d35400">${hint.from}</b> から <b style="color:#d35400">${hint.to}</b> がおすすめ！`);
+}
+
+function updateBoardState(customMsg, customFace) {
+  const turn = game.turn() === 'w' ? '白' : '黒';
+  ui.face.removeClass('turn-w turn-b').addClass(game.turn() === 'w' ? 'turn-w' : 'turn-b');
+  let msg = customMsg || "";
+  let face = customFace || (game.turn() === 'w' ? "🧙‍♂️" : "🤔");
+
+  if (game.game_over()) {
+    clearTimeout(autoTimer);
+    if (game.in_checkmate()) { msg = `勝負あり！${game.turn() === 'w' ? '黒' : '白'}の勝ち！`; face = "🏆"; }
+    else { msg = "引き分け！"; face = "🤝"; }
+  } else if (!msg) {
+    const history = game.history({ verbose: true });
+    const last = history[history.length - 1];
+    if (game.in_check()) { msg = `王手！${turn}の王様がピンチ！`; face = "😱"; }
+    else if (last && last.flags.includes('c')) { msg = `おっと！${turn === '白' ? '黒' : '白'}が駒を取った！`; face = "⚔️"; }
+    else { msg = `${turn}の番。次はどうする？`; }
+  }
+  ui.msg.html(msg); ui.face.text(face);
+  ui.status.text(isAuto ? `観戦中 (${turn})` : `${turn}の番`);
+}
+
+function highlightSquare(square, className) { $('#board .square-' + square).addClass(className); }
+// ヒントも消せるようにセレクタにクラスを含めておく
+function removeHighlights() { $('#board .square-55d63').removeClass('highlight-move highlight-capture highlight-hint'); }
+</script>
+</body>
+
+</html>
+
