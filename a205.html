@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>AI Chess - Mesugaki Ultimate (Wakarase Edition)</title>
+<title>AI Chess - Mesugaki Ultimate (Full Voice Ver.)</title>
 
 <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
 
@@ -13,13 +13,14 @@
     margin: 0;
     font-family: 'Helvetica Neue', Arial, sans-serif;
     background: linear-gradient(135deg, #134E5E, #71B280);
-    height: 100vh;
+    min-height: 100vh;
     width: 100vw;
     display: flex;
     justify-content: center;
     align-items: center;
     color: #fff;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   /* === メインのコンテナボックス === */
@@ -33,7 +34,7 @@
     gap: 20px;
     max-width: 950px;
     width: 95%;
-    max-height: 98vh;
+    min-height: 80vh; 
     position: relative;
     box-sizing: border-box;
   }
@@ -57,7 +58,7 @@
     transition: box-shadow 0.3s, border-color 0.3s;
     touch-action: none; 
   }
-     
+      
   #board {
     width: 100%;
     height: 100%;
@@ -76,7 +77,7 @@
     flex-direction: column;
     align-items: center;
     padding: 10px;
-    overflow-y: auto;
+    justify-content: flex-start;
   }
 
   /* === キャラクターアイコン === */
@@ -95,7 +96,7 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     transition: 0.3s;
   }
-     
+      
   .active-turn {
     border-color: #2ecc71 !important;
     box-shadow: 0 0 25px rgba(46, 204, 113, 1.0) !important;
@@ -115,7 +116,7 @@
   }
   .eval-bar-white { height: 100%; background: #2ecc71; width: 50%; transition: width 0.5s ease-out; }
 
-  /* === 吹き出し & ルール === */
+  /* === 吹き出し === */
   .bubble {
     position: relative;
     background: #ecf0f1;
@@ -124,7 +125,7 @@
     padding: 10px;
     width: 100%;
     margin-bottom: 10px;
-    min-height: 60px; 
+    min-height: 80px;
     font-size: 13px;
     box-sizing: border-box;
     border: 2px solid #bdc3c7;
@@ -145,32 +146,54 @@
     border-bottom-color: #bdc3c7;
   }
       
-  /* ルール説明エリア */
+  /* === ルール説明エリア === */
   .sidebar-rules {
     width: 100%;
-    background: #f1f8e9;
-    border: 1px solid #c5e1a5;
+    background: #f9fbe7;
+    border: 2px solid #c5e1a5;
     border-radius: 8px;
-    padding: 8px;
-    margin-bottom: 5px;
-    font-size: 0.75em;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 0.85em;
     color: #33691e;
     box-sizing: border-box;
     text-align: left;
-    overflow-y: auto;
-    flex-grow: 1;
-    min-height: 0;
+    flex-grow: 1; 
+    overflow-y: auto; 
+    max-height: 350px;
   }
-  .sidebar-rules h4 { margin: 0 0 3px 0; border-bottom: 1px solid #aed581; padding-bottom: 2px; }
-  .sidebar-rules ul { margin: 0; padding-left: 15px; }
-  .sidebar-rules li { margin-bottom: 2px; }
+  .sidebar-rules h4 { margin: 0 0 8px 0; border-bottom: 2px solid #aed581; padding-bottom: 2px; text-align: center;}
+   
+  .piece-rule {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    border-bottom: 1px dashed #dcedc8;
+    padding-bottom: 4px;
+  }
+  .piece-icon {
+    font-size: 1.5em;
+    width: 30px;
+    text-align: center;
+    margin-right: 8px;
+  }
+  .piece-desc {
+    font-size: 0.9em;
+    line-height: 1.2;
+  }
+  .piece-name {
+    font-weight: bold;
+    color: #558b2f;
+    display: block;
+    font-size: 0.85em;
+  }
 
   /* === ボタン類 === */
   .btn-group { 
     width: 100%; 
     display: flex; flex-direction: column; 
     gap: 5px; 
-    margin-top: auto; 
+    margin-top: 5px; 
     flex-shrink: 0;
   }
   .btn {
@@ -230,71 +253,77 @@
   /* === レスポンシブ対応（スマホ向け） === */
   @media(max-width:768px){
     body { 
-        padding: 0; 
-        align-items: flex-start; /* 上詰め */
+        padding: 5px; 
+        align-items: flex-start;
+        height: auto;
     }
     .box { 
         flex-direction: column; 
-        height: 100vh; /* 画面いっぱい */
-        max-height: 100vh;
+        height: auto;
+        min-height: 0;
         width: 100%; 
-        border-radius: 0; 
-        padding: 5px; /* 余白削減 */
+        border-radius: 5px; 
+        padding: 8px;
         margin: 0; 
-        gap: 5px;
+        gap: 10px;
     }
-     
-    /* 情報エリアを上に配置 */
+      
     .info-section { 
         order: -1; 
         width:100%; 
-        padding: 2px;
-        flex-direction: row; /* 横並びにして省スペース化 */
-        flex-wrap: wrap;
+        padding: 0;
+        flex-direction: row;
+        flex-wrap: wrap; 
         justify-content: center;
         gap: 10px;
-        flex: 0 0 auto; /* 高さを固定 */
+        flex: 0 0 auto;
     } 
-     
+      
     .mascot { width: 50px; height: 50px; font-size: 30px; margin: 0; }
     .status-wrap { display: flex; flex-direction: column; justify-content: center; flex: 1; }
     .eval-gauge-container { margin-bottom: 5px; height: 6px; }
     #status { font-size: 1em; margin-bottom: 0; text-align: center; }
 
-    /* 吹き出しを小さく */
     .bubble { 
         width: 100%; 
         margin: 5px 0; 
-        min-height: 40px; 
-        padding: 5px; 
+        min-height: 50px; 
+        padding: 8px; 
         font-size: 12px;
-        order: 3; /* 一番下へ */
+        order: 3;
     }
-    .bubble::after { display: none; } /* しっぽ削除 */
+    .bubble::after { display: none; }
 
-    /* 盤面エリア */
     .board-section { 
-        flex: 1; /* 残りのスペースを使う */
+        flex: 0 0 auto;
         padding: 0;
         justify-content: flex-start;
+        margin-bottom: 10px;
     }
-    /* 盤面サイズ調整：画面幅に合わせて正方形を維持 */
     .board-wrap { 
         width: 100%; 
-        max-width: 95vw; /* 画面幅の95% */
+        max-width: 90vw;
         height: auto; 
         aspect-ratio: 1/1; 
     }
-     
-    /* スマホではルール説明を完全に隠す（スペース確保） */
-    .sidebar-rules { display: none; }
-     
-    /* ボタンエリア */
+      
     .btn-group {
-        flex-direction: row; /* 横並び */
+        flex-direction: row;
         flex-wrap: wrap;
+        order: 5; 
+        margin-bottom: 15px;
     }
-    .btn { width: 48%; font-size: 11px; padding: 8px; flex: 1; }
+    .btn { width: 48%; font-size: 11px; padding: 10px; flex: 1; }
+
+    .sidebar-rules {
+      display: block;
+      order: 10;
+      width: 100%;
+      max-height: none; 
+      overflow-y: visible;
+      margin-top: 0;
+    }
+    .sidebar-rules h4 { font-size: 1.1em; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 4px; }
   }
 </style>
 </head>
@@ -304,7 +333,6 @@
   <div id="menu" class="overlay">
     <div style="width:100%; max-width:400px; text-align:center;">
       <h1 style="font-size:2.5em; margin:0 0 20px 0;">♚ AI Chess</h1>
-      <a href="a10.html">Ver.0.1.0へ</a><a href="a115.html">Ver.1.1.5へ</a>
       <div style="display:flex; gap:20px; width:100%;">
         <div style="flex:1;">
           <p style="font-weight:bold;">色</p>
@@ -316,9 +344,9 @@
         <div style="flex:1;">
           <p style="font-weight:bold;">レベル</p>
           <select id="level" style="width:100%; padding:8px;">
-            <option value="1">🌱 入門 (雑魚)</option>
-            <option value="2">🌲 中級 (普通)</option>
-            <option value="3" selected>🐉 超級 (最強)</option>
+            <option value="1">🌱 入門</option>
+            <option value="2">🌲 中級</option>
+            <option value="3" selected>🐉 超級</option>
           </select>
         </div>
       </div>
@@ -334,7 +362,7 @@
 
   <div class="info-section">
     <div class="mascot" id="face">😐</div>
-     
+      
     <div class="status-wrap" style="width: 100%; max-width: 300px;">
         <div class="eval-gauge-container">
             <div id="eval-bar-white" class="eval-bar-white"></div>
@@ -343,20 +371,41 @@
     </div>
 
     <div class="bubble" id="msg">設定を選んでスタートしてね！</div>
-     
+      
     <div class="sidebar-rules">
-        <h4>📜 ざこざこルール</h4>
-        <ul>
-            <li>王様(キング)を詰ませば勝ち♥</li>
-            <li>駒はドラッグで動かしてね。</li>
-        </ul>
-        <div style="font-size:0.9em; margin-top:5px; line-height:1.4;">
-            <b>♙ポーン</b>: 前1歩。敵は斜め。<br>
-            <b>♘ナイト</b>: L字ジャンプ。<br>
-            <b>♗ビショップ</b>: 斜め。<br>
-            <b>♖ルーク</b>: 縦横。<br>
-            <b>♕クイーン</b>: 縦横斜め。<br>
-            <b>♔キング</b>: 周囲1歩。
+        <h4>📜 遊び方＆ルール</h4>
+        <div style="margin-bottom:8px; font-weight:bold; text-align:center; color:#e65100;">王様(キング)を詰ませば勝ち！</div>
+        
+        <div class="piece-rule">
+            <div class="piece-icon">♙</div>
+            <div class="piece-desc"><span class="piece-name">ポーン</span>前に1歩。最初は2歩OK。敵を取る時は斜め前。</div>
+        </div>
+        <div class="piece-rule">
+            <div class="piece-icon">♖</div>
+            <div class="piece-desc"><span class="piece-name">ルーク</span>縦・横に好きなだけ進める。</div>
+        </div>
+        <div class="piece-rule">
+            <div class="piece-icon">♘</div>
+            <div class="piece-desc"><span class="piece-name">ナイト</span>L字にジャンプ！ 唯一駒を飛び越せる。</div>
+        </div>
+        <div class="piece-rule">
+            <div class="piece-icon">♗</div>
+            <div class="piece-desc"><span class="piece-name">ビショップ</span>斜めに好きなだけ進める。</div>
+        </div>
+        <div class="piece-rule">
+            <div class="piece-icon">♕</div>
+            <div class="piece-desc"><span class="piece-name">クイーン</span>縦・横・斜め。最強の駒！</div>
+        </div>
+        <div class="piece-rule">
+            <div class="piece-icon">♔</div>
+            <div class="piece-desc"><span class="piece-name">キング</span>全方向に1マスだけ。取られたら負け。</div>
+        </div>
+        
+        <div style="margin-top:10px; font-size:0.8em; color:#555;">
+            <b>特殊ルール:</b><br>
+            • <b>プロモーション</b>: ポーンが敵陣の奥まで行くとクイーンに変身！<br>
+            • <b>キャスリング</b>: キングとルークを一度に入れ替えて守る技。<br>
+            • <b>アンパッサン</b>: ポーン同士の特殊なすれ違い取り。
         </div>
     </div>
 
@@ -367,6 +416,7 @@
       <button class="btn btn-retry hidden" id="btn-retry" onclick="startGame()">🔄 再戦</button>
       <button class="btn btn-reset" onclick="location.reload()">🏠 戻る</button>
     </div>
+
   </div>
 </div>
 
@@ -386,18 +436,14 @@ let audioCtx = null;
 let currentDragHover = null; 
 let dragSimGame = null;
 
-// === 絵文字定義（表情のみ） ===
+// === 絵文字定義 ===
 const EMOJI_SELF = "🧙‍♂️"; 
 const EMOJI_ROBOT = "🤖"; 
-const EMOJI_SCARED = "😱"; // 王手された時
+const EMOJI_SCARED = "😱"; 
 
-// AIの顔バリエーション（状態別）
-// 余裕（生意気）
-const EMOJI_WINNING = ["😏", "😗", "🤭", "😎", "😈"]; 
-// 普通（思考中・退屈）
-const EMOJI_NORMAL = ["🤔", "🤨", "🥱", "😐"]; 
-// 劣勢（焦り・わからせ）
-const EMOJI_LOSING = ["😖", "🥺", "😭", "😵‍💫", "🧊"]; 
+const EMOJI_WINNING = ["😏", "😗", "🤭", "😎", "😈", "😆", "🤪", "😝"]; 
+const EMOJI_NORMAL = ["🤔", "🤨", "🥱", "😐", "🙂", "😮", "🙄"]; 
+const EMOJI_LOSING = ["😖", "🥺", "😭", "😵‍💫", "🧊", "😡", "🤯", "🥶"]; 
 
 const ui = { 
   face: $('#face'), msg: $('#msg'), status: $('#status'), 
@@ -405,65 +451,96 @@ const ui = {
   evalWhite: $('#eval-bar-white'), boardWrap: $('.board-wrap') 
 };
 
-// === セリフ辞書（形勢優先型・わからせ仕様） ===
-// 構造: [Action]_[Situation]
-// Situation: Winning (AI優勢), Even (互角), Losing (AI劣勢/わからせ)
+// === 駒の名称辞書 ===
+const pieceNamesMesu = {
+    'p': 'ポーン', 'n': 'ナイト', 'b': 'ビショップ', 'r': 'ルーク', 'q': 'クイーン', 'k': 'キング'
+};
 
+// === メッセージ辞書（超増量版） ===
 const msgDict = {
-  start: ["ふ〜ん、私に勝てると思ってるんだ？", "ざこざこさん、いらっしゃ〜い", "ボコボコにしてあげるから覚悟しなよ？"],
-  
-  // --- AIの手番 (AIが指した直後) ---
-  
-  // AIが王手した
-  ai_check_Winning: ["ほらほら、王手だよ〜♡", "逃げないと終わっちゃうよ？", "計算通りすぎてもう笑っちゃう"],
-  ai_check_Even:    ["王手！ ちょっとは焦ってくれた？", "次で詰んじゃうかもね〜", "ここ、狙い目だったでしょ？"],
-  ai_check_Losing:  ["こ、これならどうだ…！", "まだ…まだ終わってないもん！", "うるさい！ これで反撃開始なんだから！"], // 苦し紛れ
-  
-  // AIが駒を取った
-  ai_capture_Winning: ["いただきま〜す♡", "隙だらけでウケるｗ", "大事な駒、減っちゃったね〜？"],
-  ai_capture_Even:    ["ごちそうさま！", "油断したね？", "一つゲット！"],
-  ai_capture_Losing:  ["と、とりあえず一つ返したし…！", "調子に乗るな…調子に乗るな…！", "くっ…これくらいで勝った気になるなよ！"], // 必死
-  
-  // AIの通常移動
-  ai_move_Winning: ["無駄な抵抗おつかれさま〜", "もう諦めたら？ 楽になるよ？", "あはは！ 必死だねぇ、滑稽だよ"],
-  ai_move_Even:    ["ふーん、そう来るんだ", "ま、悪くないんじゃない？", "計算通りだし、問題ないね"],
-  ai_move_Losing:  ["ぐぬぬ…なんでこんな手が…", "う、嘘でしょ…？ 私が負ける…？", "手が震えて…いや、なんでもないし！"], // 焦り
-
-  // --- プレイヤーの手番 (プレイヤーが指した直後) ---
-
-  // プレイヤーに王手された
-  player_check_Winning: ["はいはい、王手ね。見えてるって", "そんな脅し、効かないよ〜だ", "必死だねぇｗ でも届かないよ？"],
-  player_check_Even:    ["っ！？ 王手…やるじゃん", "む…ちょっと油断したかな", "生意気な…！"],
-  player_check_Losing:  ["ひっ…！ ごめんなさい！", "うぅ…いじめないでよぉ…", "負けたくない…負けたくないよぉ…！"], // 完全わからせ
-  
-  // プレイヤーに駒を取られた
-  player_capture_Winning: ["あーあ、それ欲しかったの？ 上げるよｗ", "捨て駒に必死になっちゃってｗ", "誤差だよ、誤差ｗ"],
-  player_capture_Even:    ["むっ、やるね…", "それ取られるのは計算外…", "チッ、小癪な真似を…"],
-  player_capture_Losing:  ["やめて！ 私の駒がぁぁ！", "うそ…なんでそんな酷いことするの…", "もうやめて…許してよぉ…"], // 泣き
-
-  // プレイヤーの通常移動
-  player_move_Winning: ["ふぁ〜あ、退屈な手だねぇ", "そんな手で逆転できるとでも？", "勝ちが見えちゃってつまんないな〜"],
-  player_move_Even:    ["へぇ、そう動くんだ", "なるほどね…でも次はどうする？", "まだ勝負はこれからだよ"],
-  player_move_Losing:  ["なんで…なんでそんなに強いの…？", "うぅ…頭が真っ白だよぉ…", "この私が…追い詰められてる…？"], // 絶望
-
-  // --- 勝敗 ---
-  win: ["はい私の勝ち〜！ よわよわすぎ〜ｗ", "ざ〜こ♡ ざ〜こ♡ 出直してきな！", "口ほどにもないねぇ、ぷぷっ"],
-  lose: ["うそ…負けた…？ ぐすっ…", "うわあああん！ 覚えてなさいよぉ！", "悔しい…悔しいよぉ…", "今回だけは…認めてあげる…"],
-  draw: ["ちっ、引き分けかぁ…", "逃げ切って満足？ つまんないの。", "ま、負けなかったし！"],
-  
-  // --- その他 ---
-  invalidMove: ["え？ ルールも知らないの？", "そこには動けないよ？ ぷぷっ", "もしかして、わざと間違えてる？"],
-  ignoreCheck: ["ねえ、王様死んじゃうよ？ｗ", "バ〜カ！ 王手見えてないの？", "あはは！ 負けたいんだ〜"],
-  autoOn: ["えぇ〜？ 機械に頼っちゃうんだ？", "自分で勝てないからってダッサ〜ｗ", "プライドないの〜？"],
-  hint: ["しょうがないなぁ…ここ動かせば？", "ほら、特別に教えてあげる", "こんな手も見えないの？"],
-  undo: ["待った？ 往生際が悪いなぁ…", "えー、ずるくない？ ま、いいけど", "はいはい、見なかったことにしてあげる"]
+  start: [
+    "ふ〜ん、私に勝てると思ってるんだ？ 無謀だねぇｗ",
+    "ざこざこさん、いらっしゃ〜い！ 手加減してあげる♡",
+    "ボコボコにしてあげるから覚悟しなよ？ 泣いても知らないよ〜",
+    "へぇ、チェスできるんだ？ 駒の動かし方くらいは知ってる？",
+    "暇つぶしにはなるかな？ せいぜい頑張ってね〜ｗ",
+    "私が負ける確率？ …計算する必要ある？ 0%だよｗ",
+    "ねぇねぇ、早く始めよ？ 待ちくたびれちゃった。",
+    "瞬殺しちゃったらごめんね？ ぷぷっ",
+    "あーあ、またカモが来ちゃった。運が悪いねぇｗ"
+  ],
+  win: [ // プレイヤー敗北
+    "はい私の勝ち〜！ よわよわすぎ〜ｗ あくびが出ちゃう",
+    "ざ〜こ♡ ざ〜こ♡ 出直してきな！ 悔しい？ ねぇ悔しい？",
+    "口ほどにもないねぇ、ぷぷっ！ ママに慰めてもらいなよｗ",
+    "あはは！ まさか本気で勝てると思ってたの？ 可愛い〜ｗ",
+    "弱すぎてバグかと思ったわ。練習してから来なよ？",
+    "ねぇねぇ、今どんな気持ち？ 負け犬の遠吠え聞かせてよ♡",
+    "つまんなーい。もっと強い人とやりたいなぁ〜。",
+    "これが実力の差！ 絶望した？",
+    "はい、お疲れ様〜。ゴミ箱行き決定だね♡"
+  ],
+  lose: [ // プレイヤー勝利（AI敗北）
+    "うそ…負けた…？ ありえない…こんなの絶対おかしい！",
+    "うわあああん！ バグだ！ これはバグなの！",
+    "悔しい…悔しいよぉ…！ 次は絶対ボコボコにしてやるんだから！",
+    "今回だけは…認めてあげる…。調子に乗らないでよね！",
+    "ぐすっ…い、いいもん。本気出してなかっただけだもん…。",
+    "はぁ！？ あんた何かズルしたでしょ！？ 信じられない！",
+    "コントローラーが壊れてた！ 今のはノーカン！",
+    "なんで…なんで私が負けるのよぉぉぉ！",
+    "覚えてなさいよ…次は絶対に泣かせてやるから！"
+  ],
+  draw: [
+    "ちっ、引き分けかぁ… つまんな。",
+    "逃げ切って満足？ 次は絶対に捕まえてあげるから。",
+    "ま、負けなかったし！ 実質私の勝ちみたいなもんでしょ。",
+    "ふーん、粘るね。しぶとい雑魚は嫌いじゃないよ？",
+    "これ以上やっても時間の無駄だしね。今回は見逃してあげる。",
+    "引き分けで喜んでるの？ レベル低いなぁｗ"
+  ],
+  invalidMove: [
+    "え？ ルールも知らないの？ お勉強不足だね〜ｗ",
+    "そこには動けないよ？ ぷぷっ、パニックになっちゃった？",
+    "もしかして、わざと間違えてる？ 構ってちゃん乙ｗ",
+    "指が震えてるんじゃない？ 落ち着きなよ雑魚さんｗ",
+    "はいブッブー！ 間違いです〜ｗ",
+    "ねぇ、私の話聞いてた？ ルールブック読んでくる？"
+  ],
+  ignoreCheck: [
+    "ねえ、王様死んじゃうよ？ｗ 目悪いの？",
+    "バ〜カ！ 王手見えてないの？ 終わらせていい？",
+    "あはは！ 負けたいんだ〜。じゃあ遠慮なく♡",
+    "無視とか勇者だねｗ 死に急ぎすぎじゃない？",
+    "王様を守る気ないんだｗ 薄情だねぇ〜"
+  ],
+  autoOn: [
+    "えぇ〜？ 機械に頼っちゃうんだ？ プライドないの〜？",
+    "自分で勝てないからってダッサ〜ｗ 見下しちゃうな〜",
+    "はいはい、私が強すぎるもんね。AIに助けてもらいなｗ",
+    "楽して勝ちたいとか、人生甘くないよ？",
+    "えっ、自動？ つまんないの〜。あんたの苦しむ顔が見たいのに。"
+  ],
+  hint: [
+    "しょうがないなぁ…ここ動かせば？ 感謝してよね！",
+    "ほら、特別に教えてあげる。私って優しい〜♡",
+    "こんな手も見えないの？ 眼科行ったほうがいいよｗ",
+    "次からは自分で考えなよ？ 甘えん坊さんなんだから。",
+    "ここだよここ！ まったく、世話が焼けるなぁ。"
+  ],
+  undo: [
+    "待った？ 往生際が悪いなぁ… 男らしくないよ？",
+    "えー、ずるくない？ ま、余裕あるからいいけど〜",
+    "はいはい、見なかったことにしてあげる。優しい私に感謝しな！",
+    "「今のなし！」って小学生かよｗ 笑っちゃうわ",
+    "時間戻しても結果は同じだと思うけどねｗ"
+  ]
 };
 
 function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-function getRandomMsg(key) { 
-    return getRandom(msgDict[key] || ["..."]); 
-}
+function getRandomMsg(key) { return getRandom(msgDict[key] || ["..."]); }
 
+// === 音声関連 ===
 function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); }
 function playSound(type) {
   if(!audioCtx) return;
@@ -472,7 +549,7 @@ function playSound(type) {
   const gain = audioCtx.createGain();
   osc.connect(gain);
   gain.connect(audioCtx.destination);
-  
+    
   if (type === 'move') {
     osc.frequency.setValueAtTime(180, t); osc.frequency.exponentialRampToValueAtTime(40, t+0.12);
     gain.gain.setValueAtTime(0.4, t); gain.gain.exponentialRampToValueAtTime(0.01, t+0.12);
@@ -488,7 +565,7 @@ function playSound(type) {
   }
 }
 
-// === AI関連 ===
+// === AIロジック（MiniMax） ===
 const PST={
     p:[0,0,0,0,0,0,0,0,50,50,50,50,50,50,50,50,10,10,20,30,30,20,10,10,5,5,10,25,25,10,5,5,0,0,0,20,20,0,0,0,5,-5,-10,0,0,-10,-5,5,5,10,10,-20,-20,10,10,5,0,0,0,0,0,0,0,0],
     n:[-50,-40,-30,-30,-30,-30,-40,-50,-40,-20,0,0,0,0,-20,-40,-30,0,10,15,15,10,0,-30,-30,5,15,20,20,15,5,-30,-30,0,15,20,20,15,0,-30,-30,5,10,15,15,10,5,-30,-40,-20,0,5,5,0,-20,-40,-50,-40,-30,-30,-30,-30,-40,-50],
@@ -526,7 +603,7 @@ function minimax(g, depth, alpha, beta, isMax) {
   if (depth===0 || g.game_over()) return getBoardValue(g);
   let moves = orderMoves(g.moves({ verbose: true }));
   if(moves.length === 0) return getBoardValue(g);
-  
+    
   if (isMax) {
     let maxEval = -Infinity;
     for (let m of moves) {
@@ -556,19 +633,19 @@ function getBestMove(levelOverride) {
   const currentLevel = levelOverride || aiLevel;
   const moves = game.moves({ verbose: true });
   if (!moves.length) return null;
-  
+    
   if (currentLevel === 1) {
     if(Math.random()<0.5) return getRandom(moves);
     const captures = moves.filter(m => m.flags.includes('c'));
     return captures.length ? getRandom(captures) : getRandom(moves);
   }
-  
+    
   const depth = (currentLevel === 2) ? 2 : 3;
   const isWhite = (game.turn() === 'w');
   let bestMove = null; 
   let bestVal = isWhite ? -Infinity : Infinity;
   const orderedMoves = orderMoves(moves);
-  
+    
   for(let m of orderedMoves) {
     game.move(m);
     let val = minimax(game, depth - 1, -Infinity, Infinity, !isWhite);
@@ -589,12 +666,12 @@ function startGame() {
   isAuto = false; 
   clearTimeout(autoTimer);
   $('#board').empty();
-  
+    
   ui.btnRetry.addClass('hidden');
   ui.btnAuto.show().removeClass('hidden');
   ui.btnHint.show().removeClass('hidden').prop('disabled', false).removeClass('btn-disabled');
   ui.btnUndo.show().removeClass('hidden').prop('disabled', false).removeClass('btn-disabled');
-  
+    
   const orient = playerColor==='w'?'white':'black';
   const pieceTheme = p => {
     const c = p[0]==='w'?'#fff':'#000', s = p[0]==='w'?'#000':'#fff';
@@ -612,13 +689,12 @@ function startGame() {
     onDrop: onDrop, 
     onSnapEnd: onSnapEnd
   });
-  
+    
   $(window).resize(board.resize);
   ui.msg.text(getRandomMsg('start'));
   ui.btnAuto.removeClass('btn-auto-active').text("🤖 オート: OFF");
   updateStatus(null);
-  
-  // AIが先手(白)の場合、初手を打つ
+    
   if (playerColor === 'b') {
       gameLoop();
   }
@@ -630,7 +706,7 @@ function gameLoop() {
 
   const myTurn = (game.turn() === playerColor);
   if (myTurn && !isAuto) return;
-  
+    
   autoTimer = setTimeout(() => {
     makeAiMove();
   }, 600);
@@ -641,18 +717,18 @@ function makeAiMove() {
 
   const turnColor = game.turn();
   const isEnemy = (turnColor !== playerColor);
+  // Autoモードの時は、敵のターンなら敵の強さ、自分のターンなら最強(3)で動かす
   const useLevel = isEnemy ? aiLevel : 3;
-  
+    
   const m = getBestMove(useLevel);
   if (m) {
     const moveResult = game.move(m);
     board.position(game.fen());
     playSound(moveResult.flags.includes('c') ? 'capture' : 'move');
-    
-    // AIの手番が終わったので、状態更新
-    updateTurnMessage(moveResult, false); // isPlayerMove = false (AIが動かした)
+      
+    updateTurnMessage(moveResult); 
     updateStatus(moveResult); 
-    
+      
     gameLoop(); 
   }
 }
@@ -662,7 +738,7 @@ function onDragStart(source, piece) {
   if (game.game_over() || isAuto) return false;
   if (game.turn() !== playerColor) return false;
   if ((playerColor === 'w' && piece.search(/^b/) !== -1) || (playerColor === 'b' && piece.search(/^w/) !== -1)) return false;
-  
+    
   const moves = game.moves({ square: source, verbose: true });
   if (moves.length === 0) return false;
 
@@ -677,9 +753,9 @@ function onDragStart(source, piece) {
 function onDragMove(newLocation, oldLocation, source, piece) {
   if (newLocation === currentDragHover) return; 
   currentDragHover = newLocation;
-  
+    
   $('#board .highlight-danger-source').removeClass('highlight-danger-source');
-  
+    
   if (newLocation === 'offboard') return;
 
   dragSimGame.load(game.fen());
@@ -697,7 +773,7 @@ function onDragMove(newLocation, oldLocation, source, piece) {
 function onDrop(source, target) {
   removeHighlights();
   $('.highlight-danger-source').removeClass('highlight-danger-source');
-  
+    
   const wasInCheck = game.in_check();
   const move = game.move({ from: source, to: target, promotion: 'q' });
 
@@ -708,10 +784,10 @@ function onDrop(source, target) {
   }
 
   playSound(move.flags.includes('c') ? 'capture' : 'move');
-  
-  updateTurnMessage(move, true); // isPlayerMove = true
+    
+  updateTurnMessage(move);
   updateStatus(move);
-  
+    
   gameLoop();
 }
 
@@ -720,40 +796,226 @@ function onSnapEnd() { board.position(game.fen()); }
 // === AIの形勢判断スコアを取得 (AI視点のスコア) ===
 function getAiScore() {
     const rawScore = getBoardValue(game);
-    // プレイヤーが白なら、AIは黒なので -rawScore がAIのスコア
     return (playerColor === 'w') ? -rawScore : rawScore;
 }
-
-// === AIの精神状態を取得 (Winning / Losing / Even) ===
 function getAiState(score) {
     if (score > 250) return "Winning";
     if (score < -250) return "Losing";
     return "Even";
 }
 
-// === メッセージ更新ロジック (形勢優先・マトリックス型) ===
-function updateTurnMessage(move, isPlayerMove) {
+// === 【解説付きメッセージ生成ロジック】 ===
+// 全ての分岐で駒名を含めるように拡張
+function updateTurnMessage(move) {
     if (game.game_over()) return; 
 
     const score = getAiScore();
     const state = getAiState(score);
-    
-    let eventType = "move"; // デフォルト
-    if (game.in_check()) eventType = "check";
-    else if (move.flags.includes('c')) eventType = "capture";
+    const pieceName = pieceNamesMesu[move.piece] || '駒';
+    const isPlayerSideMove = (move.color === playerColor);
+      
+    // --- プレイヤー側（味方）が動かした時 ---
+    if (isPlayerSideMove) {
+        if (game.in_check()) {
+            if (state === "Winning") {
+                ui.msg.text(getRandom([
+                    `うわっ、${pieceName}で王手！？ …なんてね、余裕だしｗ`,
+                    `その${pieceName}、邪魔なんだけど。王手すれば勝てると思った？`,
+                    `${pieceName}で必死に王手？ 無駄な抵抗ご苦労さまｗ`,
+                    `きゃー${pieceName}が来たー（棒）。はいはい王手王手。`
+                ]));
+            } else if (state === "Losing") {
+                ui.msg.text(getRandom([
+                    `ひっ…${pieceName}で王手！？ 冗談でしょ！？`,
+                    `ちょっと！ その${pieceName}どかしてよ！ 負けちゃう！`,
+                    `やめて…${pieceName}こっち来ないでぇ…`,
+                    `うそ…${pieceName}の一撃が重い…タイム！ タイムだってば！`
+                ]));
+            } else {
+                ui.msg.text(getRandom([
+                    `へぇ、${pieceName}で王手かけるんだ。やるじゃん。`,
+                    `ちっ、${pieceName}がうざったいなぁ。`,
+                    `その${pieceName}、いい働きするね。ムカつくけど。`,
+                    `王手か…${pieceName}の動き、警戒してたのに。`
+                ]));
+            }
+        } else if (move.flags.includes('c')) {
+            const captured = pieceNamesMesu[move.captured];
+            if (move.captured === 'q') {
+                ui.msg.text(getRandom([
+                    `ああっ！ ${pieceName}で私の${captured}を取るなんて…！ 最低！`,
+                    `嘘でしょ！？ ${pieceName}ごときに${captured}が…！`,
+                    `返してよ！ 私の${captured}！ 信じられない！`,
+                    `うわあああん！ ${captured}が死んじゃったぁ！`
+                ]));
+            } else if (state === "Winning") {
+                ui.msg.text(getRandom([
+                    `あーあ、${pieceName}で${captured}取っちゃって。罠なのにｗ`,
+                    `${captured}欲しかったの？ ${pieceName}をそんな所に動かして大丈夫？`,
+                    `その${captured}はエサだよ？ ${pieceName}が孤立しちゃうねｗ`,
+                    `安い${captured}を取るために${pieceName}を使うんだ。へぇ〜ｗ`
+                ]));
+            } else {
+                ui.msg.text(getRandom([
+                    `痛っ…${pieceName}で${captured}を取るなんて、計算外…。`,
+                    `くっ、${captured}がやられた…${pieceName}の動き、鋭いね。`,
+                    `大事にしてた${captured}が…${pieceName}、許さないから！`,
+                    `やるね…${pieceName}を活用して${captured}を取るなんて。`
+                ]));
+            }
+        } else if (move.flags.includes('k') || move.flags.includes('q')) {
+            ui.msg.text(getRandom([
+                `キングを囲って逃げた？ ${pieceName}は臆病だねぇ〜♡`,
+                `キャスリングか…${pieceName}を守るのに必死だねｗ`,
+                `安全地帯に${pieceName}を隠したつもり？ すぐ壊してあげる♡`,
+                `ふーん、${pieceName}を守りに入ったんだ。つまんないの。`
+            ]));
+        } else if (move.flags.includes('p')) {
+            ui.msg.text(getRandom([
+                `げっ、${pieceName}が昇格！？ 生意気すぎる！`,
+                `ポーンの分際でクイーンに成るなんて…${pieceName}のくせに！`,
+                `ちょっと、その${pieceName}は聞いてない！ 反則じゃないの！？`,
+                `調子に乗って${pieceName}を進化させちゃって…潰してやる！`
+            ]));
+        } else {
+            // 通常移動の解説（駒ごとの分岐）
+            const phrases = {
+                'p': [
+                    `${pieceName}をちょこちょこ進めて…可愛いねぇｗ`,
+                    `その${pieceName}、進めて何になるの？ ぷぷっ`,
+                    `じわじわ${pieceName}で攻める気？ 性格暗そうｗ`
+                ],
+                'n': [
+                    `${pieceName}がピョンピョン跳ねて…うざい動きだなぁ。`,
+                    `その${pieceName}の動き、ちょっと読みづらいかも…。`,
+                    `変な動きの${pieceName}だね。馬鹿にしてる？`
+                ],
+                'b': [
+                    `斜めから${pieceName}で狙ってる？ バレバレだよ〜ｗ`,
+                    `その${pieceName}、遠くから視線を感じるわね…。`,
+                    `${pieceName}をスッと通してきたか。`
+                ],
+                'r': [
+                    `縦横無尽に${pieceName}を動かす気？ 単純だねぇ。`,
+                    `${pieceName}の突破力に頼っちゃって。脳筋？`,
+                    `その${pieceName}、壁みたいで邪魔くさいなぁ。`
+                ],
+                'q': [
+                    `出た、${pieceName}頼み！ 初心者あるあるだねｗ`,
+                    `最強の${pieceName}を動かして満足？`,
+                    `その${pieceName}、暴れさせないからね。`
+                ],
+                'k': [
+                    `王様（${pieceName}）自らお散歩？ 余裕ないねぇｗ`,
+                    `${pieceName}が逃げ回ってるｗ みっともないよ？`,
+                    `そんな所に${pieceName}動かして大丈夫〜？`
+                ]
+            };
+            const pList = phrases[move.piece] || phrases['p'];
 
-    // アクター (誰がそのイベントを起こしたか)
-    const actor = isPlayerMove ? "player" : "ai";
-    
-    // キー生成: 例 "ai_check_Losing" (AIが劣勢なのに王手をかけた -> 苦し紛れ)
-    const key = `${actor}_${eventType}_${state}`;
-    
-    // 辞書から取得 (なければデフォルトの反応)
-    if (msgDict[key]) {
-        ui.msg.text(getRandomMsg(key));
-    } else {
-        // フォールバック（通常移動など）
-        ui.msg.text(getRandomMsg(`${actor}_move_${state}`));
+            if (state === "Winning") {
+               ui.msg.text(getRandom(pList.map(s => s + " 無駄なあがきだけどね！")));
+            } else if (state === "Losing") {
+               ui.msg.text(getRandom([
+                   `くっ…その${pieceName}の動き、嫌な予感がする…。`,
+                   `な、何その${pieceName}の手…読んでなかった…`,
+                   `うぅ…${pieceName}が迫ってくる…プレッシャーかけないでよ…`
+               ]));
+            } else {
+               ui.msg.text(getRandom(pList));
+            }
+        }
+    } 
+    // --- AI側（敵）が動かした時 ---
+    else {
+        if (game.in_check()) {
+             if (state === "Losing") {
+                 ui.msg.text(getRandom([
+                     `これならどう！？ ${pieceName}で起死回生の王手！`,
+                     `お願い！ ${pieceName}の攻撃、当たって！`,
+                     `くらえ！ ${pieceName}による必殺の王手！`,
+                     `もうヤケクソだよ！ ${pieceName}で特攻！`
+                 ]));
+             } else {
+                 ui.msg.text(getRandom([
+                     `ほらほら、${pieceName}で王手だよ〜♡ 逃げなきゃ終わるよ？`,
+                     `${pieceName}が王様の喉元にナイフ突きつけてるよ？ｗ`,
+                     `キャハハ！ ${pieceName}に追い詰められて惨め〜ｗ`,
+                     `さぁ、${pieceName}からどう逃げる？ 泣いて謝るなら許すかも？`
+                 ]));
+             }
+        } else if (move.flags.includes('c')) {
+            const captured = pieceNamesMesu[move.captured];
+             if (move.captured === 'q') {
+                 ui.msg.text(getRandom([
+                     `やった！ あんたの${captured}、私の${pieceName}でいただいちゃった〜♡`,
+                     `最強の${captured}がいなくなってどんな気持ち〜？ 私の${pieceName}すごいでしょ！`,
+                     `${pieceName}で${captured}を撃破！ もう勝負ありだね！`,
+                     `あーあ、大事な${captured}を${pieceName}に捧げちゃうなんてｗ`
+                 ]));
+             } else {
+                 ui.msg.text(getRandom([
+                     `遠慮なく${captured}を${pieceName}で狩るね。隙だらけなんだもんｗ`,
+                     `いただき〜！ ${pieceName}のご飯になっちゃったね、${captured}さんｗ`,
+                     `${captured}、おいしいです♡ ${pieceName}も喜んでるよ！`,
+                     `お掃除完了〜！ 邪魔な${captured}は${pieceName}が消しちゃいました！`
+                 ]));
+             }
+        } else if (move.flags.includes('p')) {
+            ui.msg.text(getRandom([
+                `見て見て！ 私の${pieceName}が最強のクイーンになっちゃった♡`,
+                `これが${pieceName}の真の姿！ 絶望しなさい！`,
+                `進化〜！ この${pieceName}はもう誰にも止められないよね〜ｗ`,
+                `はい最強〜。${pieceName}がクイーンになった時点で詰みだよ？`
+            ]));
+        } else {
+            // AIの狙いを解説風に（駒ごとの分岐）
+             const phrasesAi = {
+                'p': [
+                    `私の${pieceName}を進めてあげる。じわじわ苦しんでね♡`,
+                    `ほら、${pieceName}が近づいていくよ〜。怖い？`,
+                    `この${pieceName}が将来化けるんだから。覚えときなよ？`
+                ],
+                'n': [
+                    `華麗なる${pieceName}のジャンプ！ 予測できるかな？`,
+                    `私の${pieceName}はトリッキーだよ〜。ついてこれる？`,
+                    `ふふっ、この${pieceName}の位置、絶妙でしょ？`
+                ],
+                'b': [
+                    `遠距離から${pieceName}でロックオン完了♡`,
+                    `死角から${pieceName}がこんにちは！`,
+                    `この${pieceName}の射線、見えてなかったでしょ？`
+                ],
+                'r': [
+                    `ドカーンと${pieceName}を進めるよ！ 道を開けなさい！`,
+                    `私の${pieceName}は重戦車なの。止められないよ？`,
+                    `この列は${pieceName}が制圧したから。`
+                ],
+                'q': [
+                    `最強の${pieceName}がお出ましだ！ ひれ伏しなさい！`,
+                    `私の${pieceName}に勝てると思ってる？`,
+                    `さあ、${pieceName}で蹂躙してあげる♡`
+                ],
+                'k': [
+                    `王様（${pieceName}）は高みの見物といこうかな。`,
+                    `安全な場所に${pieceName}を移動っと。`,
+                    `ふふん、${pieceName}は捕まらないよ〜。`
+                ]
+            };
+            const pListAi = phrasesAi[move.piece] || phrasesAi['p'];
+
+            if (state === "Winning") {
+                ui.msg.text(getRandom(pListAi.map(s => s + " 完璧すぎて怖い？")));
+            } else if (state === "Losing") {
+                ui.msg.text(getRandom([
+                    `と、とりあえず${pieceName}で様子見かな…。油断しないでよね！`,
+                    `まだ負けてないし！ ${pieceName}を信じてるし！`,
+                    `なんとか${pieceName}で逆転の糸口を…！`
+                ]));
+            } else {
+                ui.msg.text(getRandom(pListAi));
+            }
+        }
     }
 }
 
@@ -763,23 +1025,19 @@ function updateStatus(lastMove) {
   const aiScore = getAiScore();
   const aiState = getAiState(aiScore);
 
-  // 1. ゲージ更新 (白番基準のスコアで表示)
-  // スコアが正なら白有利。ゲージ50%を0としてマッピング
+  // 1. ゲージ更新
   const pct = (1 / (1 + Math.exp(-rawScore / 500))) * 100;
   ui.evalWhite.css('width', pct + '%');
-  
+    
   const isMyTurn = (game.turn() === playerColor);
-  
-  // 枠線演出
+    
   if (isMyTurn) ui.face.addClass('active-turn');
   else ui.face.removeClass('active-turn');
-
-  // === 顔アイコン決定ロジック ===
 
   // A. ゲーム終了時
   if(game.game_over()) {
     ui.btnRetry.removeClass('hidden'); ui.btnAuto.hide(); ui.btnHint.hide(); ui.btnUndo.hide();
-    
+      
     if(game.in_checkmate()) {
         const playerLost = (game.turn() === playerColor);
         if (playerLost) {
@@ -798,14 +1056,13 @@ function updateStatus(lastMove) {
     }
     return;
   }
-  
+    
   ui.status.text(isMyTurn ? "あなたの番" : "相手の番");
   if(board) board.draggable = (isMyTurn && !isAuto && !game.game_over());
 
-  // B. プレイヤー手番中 (AIは待機中)
+  // B. プレイヤー手番中
   if (isMyTurn) {
       if (game.in_check()) {
-          // プレイヤーが王手されている
           ui.face.text(EMOJI_SCARED);
           ui.boardWrap.addClass('in-check-danger');
       } else {
@@ -815,53 +1072,40 @@ function updateStatus(lastMove) {
       return;
   }
 
-  // C. AIの手番 (思考中・リアクション)
+  // C. AIの手番
   ui.boardWrap.removeClass('in-check-danger');
 
-  // 直前のプレイヤーの手に対するリアクション（短期的な感情）
-  // AIが劣勢(Losing)なら、何が起きても基本は辛そうにする
-  
   if (aiState === "Losing") {
-      ui.face.text(getRandom(EMOJI_LOSING)); // 基本的に泣き顔/焦り顔
+      ui.face.text(getRandom(EMOJI_LOSING)); 
       return;
   }
-  
   if (aiState === "Winning") {
-      ui.face.text(getRandom(EMOJI_WINNING)); // 基本的にドヤ顔
+      ui.face.text(getRandom(EMOJI_WINNING)); 
       return;
   }
 
-  // 接戦(Even)の場合、直前のイベントに反応する
   if (lastMove) {
-      // プレイヤーが指した直後
-      if (game.turn() === playerColor) { // AIの手番のときは game.turn() == playerColor ではない(逆)
-         // ここは makeAiMove 等で呼ばれる際は状況が異なるため、
-         // 「今AIの手番である」＝「直前はプレイヤーが指した」
-      }
-      
-      const isPlayerJustMoved = (game.turn() !== playerColor); // 今AIの手番
-      
+      // 直前の手がプレイヤー(またはオート味方)によるものだった場合、その結果を見てAIが反応する
+      const isPlayerJustMoved = (lastMove.color === playerColor);
       if (isPlayerJustMoved) {
           if (game.in_check()) {
-               ui.face.text("😵‍💫"); // 王手されたら驚く
+               ui.face.text("😵‍💫"); 
                ui.boardWrap.addClass('in-check-danger');
                return;
           }
           if (lastMove.flags.includes('c')) {
-               ui.face.text("😠"); // 駒を取られたら怒る
+               ui.face.text("😠"); 
                return;
           }
       }
   }
-
-  // 特にイベントがない接戦時は普通/思考中
   ui.face.text(getRandom(EMOJI_NORMAL));
 }
 
 function toggleAutoPlay() {
   if(game.game_over()) return;
   isAuto = !isAuto;
-  
+    
   if(isAuto) {
     removeHighlights();
     ui.btnHint.prop('disabled', true).addClass('btn-disabled');
