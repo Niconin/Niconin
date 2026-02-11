@@ -12,7 +12,7 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23134E5E%22 rx=%2220%22/><text x=%2250%22 y=%2250%22 font-size=%2260%22 text-anchor=%22middle%22 dominant-baseline=%22central%22>♚</text></svg>">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23134E5E%22 rx=%2220%22/><text x=%2250%22 y=%2250%22 font-size=%2260%22 text-anchor=%22middle%22 dominant-baseline=%22central%22>♚</text></svg>">
 
-<link rel="manifest" href='data:application/manifest+json;base64,eyJkZXNjcmlwdGlvbiI6IkFJIENoZXNzIE1lc3VnYWtpIFZlcnNpb24iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWwsPHN2ZyB4bWxucz0lMjJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyUyMiB2aWV3Qm94PSUyMjAgMCAxMDAgMTAwJTIyPjxyZWN0IHdpZHRoPSUyMjEwMCUyMiBoZWlnaHQ9JTIyMTAwJTIyIGZpbGw9JTIyIzEzNEU1RSUyMiByeD0lMjIyMCUyMi8+PHRleHQgeD0lMjI1MCUyMiB5PSUyMjUwJTIyIGZvbnQtc2l6ZT0lMjI2MCUyMiB0ZXh0LWFuY2hvcj0lMjJtaWRkbGUlMjIgZG9taW5hbnQtYmFzZWxpbmU9JTIyY2VudHJhbCUyMj7imZg8L3RleHQ+PC9zdmc+Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV0sIm5hbWUiOiJBSSBDaGVzcyIsIm9yaWVudGF0aW9uIjoicG9ydHJhaXQiLCJzaG9ydF9uYW1lIjoiQUkgQ2hlc3MiLCJzdGFydF91cmwiOiIuIiwidGhlbWVfY29xvciIjEzNEU1RSIsImJhY2tncm91bmRfY29sb3IiOiIjMTM0RTVFIn0='>
+<link rel="manifest" id="dynamic-manifest">
 
 <title>AI Chess - Ultimate Edition</title>
 
@@ -433,7 +433,63 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script>
-// === 右クリック（コンテキストメニュー）無効化 ===
+(function() {
+  // 1. アイコン画像 (SVG) の定義
+  const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#134E5E" rx="20"/><text x="50" y="50" font-size="60" text-anchor="middle" dominant-baseline="central">♚</text></svg>`;
+  const iconUrl = "data:image/svg+xml," + encodeURIComponent(iconSvg);
+
+  // 2. マニフェストファイル (Web App Manifest) の動的生成
+  const manifest = {
+    "name": "AI Chess",
+    "short_name": "Chess",
+    "start_url": ".",
+    "display": "standalone", // アドレスバーを消す設定
+    "background_color": "#134E5E",
+    "theme_color": "#134E5E",
+    "orientation": "portrait",
+    "icons": [
+      { "src": iconUrl, "sizes": "192x192", "type": "image/svg+xml" },
+      { "src": iconUrl, "sizes": "512x512", "type": "image/svg+xml" }
+    ]
+  };
+  
+  // JSONをBlob化してURLを生成し、Linkタグにセット
+  const stringManifest = JSON.stringify(manifest);
+  const blobManifest = new Blob([stringManifest], {type: 'application/json'});
+  const manifestURL = URL.createObjectURL(blobManifest);
+  document.getElementById('dynamic-manifest').setAttribute('href', manifestURL);
+
+  // 3. Service Worker の動的生成と登録
+  // 通常は sw.js という別ファイルが必要ですが、Blobを使ってメモリ上で仮想ファイルを作ります
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+      // インストール時にキャッシュ等は今回省略（シンプル構成）
+      self.addEventListener('install', (e) => {
+        self.skipWaiting();
+      });
+      self.addEventListener('activate', (e) => {
+        e.waitUntil(self.clients.claim());
+      });
+      // オフラインでも動作するようにフェッチイベントをハンドル
+      self.addEventListener('fetch', (e) => {
+        e.respondWith(fetch(e.request));
+      });
+    `;
+    const blobSw = new Blob([swCode], {type: 'text/javascript'});
+    const swUrl = URL.createObjectURL(blobSw);
+    
+    // 仮想URLのService Workerを登録
+    navigator.serviceWorker.register(swUrl)
+      .then(reg => console.log('PWA Service Worker Registered', reg))
+      .catch(err => console.log('PWA Service Worker Failed', err));
+  }
+})();
+</script>
+
+<script>
+// === ゲーム本体のスクリプト ===
+
+// 右クリック禁止
 window.oncontextmenu = function(event) {
     event.preventDefault();
     event.stopPropagation();
@@ -580,72 +636,99 @@ $('#volume-slider').on('input', function() {
     const val = $(this).val();
     masterVolume = val / 100;
     $('#vol-display').text(val + '%');
+    
+    // スライダー操作時にAudioContextが無ければ作る
     if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if(audioCtx.state === 'suspended') audioCtx.resume();
 });
 
 function initAudio() { 
-  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if(audioCtx.state === 'suspended') audioCtx.resume();
+  if(!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
 }
 
 function playSound(type) {
   if(!audioCtx) return;
-  if(masterVolume <= 0) return;
+  if(masterVolume <= 0) return; // ミュート時は処理しない
   
-  if(audioCtx.state === 'suspended') audioCtx.resume();
+  if(audioCtx.state === 'suspended') {
+      audioCtx.resume();
+  }
+
   const t = audioCtx.currentTime;
 
+  // === 勝利音（ファンファーレ）の処理 ===
   if (type === 'win') {
+    // Cメジャーのアルペジオ (C4, E4, G4, C5)
     const notes = [523.25, 659.25, 783.99, 1046.50];
     notes.forEach((freq, i) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-        osc.type = 'triangle'; 
+
+        osc.type = 'triangle'; // 音楽的な音色
         osc.frequency.value = freq;
-        const start = t + (i * 0.1); 
+
+        const start = t + (i * 0.1); // ずらして鳴らす
         const duration = 0.4;
+
         gain.gain.setValueAtTime(0, start);
         gain.gain.linearRampToValueAtTime(masterVolume, start + 0.05);
         gain.gain.exponentialRampToValueAtTime(0.01, start + duration);
+
         osc.start(start);
         osc.stop(start + duration);
     });
-    return;
+    return; // ここで終了
   }
 
+  // === 通常の効果音（単音） ===
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
+  
   osc.connect(gain);
   gain.connect(audioCtx.destination);
+  
   let vol = masterVolume;
   
   if (type === 'move') {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(300, t); 
     osc.frequency.exponentialRampToValueAtTime(100, t + 0.15);
+    
     gain.gain.setValueAtTime(vol, t); 
     gain.gain.linearRampToValueAtTime(0.01, t + 0.15);
-    osc.start(t); osc.stop(t + 0.15);
+    
+    osc.start(t); 
+    osc.stop(t + 0.15);
   } 
   else if (type === 'capture') {
     osc.type = 'triangle'; 
     osc.frequency.setValueAtTime(200, t); 
     osc.frequency.exponentialRampToValueAtTime(50, t + 0.2);
+    
     let capVol = Math.min(vol * 1.3, 1.0);
     gain.gain.setValueAtTime(capVol, t); 
     gain.gain.linearRampToValueAtTime(0.01, t + 0.2);
-    osc.start(t); osc.stop(t + 0.2);
+    
+    osc.start(t); 
+    osc.stop(t + 0.2);
   } 
   else if (type === 'start') {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(440, t); 
     osc.frequency.linearRampToValueAtTime(880, t + 0.4);
+    
     gain.gain.setValueAtTime(vol, t); 
     gain.gain.linearRampToValueAtTime(0, t + 0.6);
-    osc.start(t); osc.stop(t + 0.6);
+    
+    osc.start(t); 
+    osc.stop(t + 0.6);
   }
 }
 
@@ -734,20 +817,15 @@ function getBestMove(levelOverride) {
   const moves = game.moves({ verbose: true });
   if (!moves.length) return null;
     
-  // === レベル1: 入門 (激弱) ===
-  // 70%の確率で完全ランダム、30%の確率で単純な駒取りがあればそれを選ぶ
-  // 深読みは一切しないのでボカスカ殴れる
+  // === 入門(Lv1): 激弱 ===
   if (currentLevel === 1) {
     if(Math.random() < 0.7) return getRandom(moves);
     const captures = moves.filter(m => m.flags.includes('c'));
     return captures.length ? getRandom(captures) : getRandom(moves);
   }
-    
-  // === レベル設定に応じた探索深さ ===
-  // レベル2(中級): 深さ2 (相手の応手まで読む)
-  // レベル3(超級): 深さ3 (その次の自分の手まで読む)
-  const depth = (currentLevel === 2) ? 2 : 3;
   
+  // === 中級(Lv2) / 超級(Lv3) ===
+  const depth = (currentLevel === 2) ? 2 : 3;
   const isWhite = (game.turn() === 'w');
   let bestMove = null; 
   let bestVal = isWhite ? -Infinity : Infinity;
@@ -1075,10 +1153,12 @@ function updateStatus(lastMove) {
     if(game.in_checkmate()) {
         const playerLost = (game.turn() === playerColor);
         if (playerLost) {
+            // プレイヤーの負け
             ui.status.text("あなたの負け (ざぁこ♡)");
             ui.msg.html(getRandomMsg('win')); 
             ui.face.text(getRandom(EMOJI_WINNING));
         } else {
+            // プレイヤーの勝ち（紙吹雪発動！）
             ui.status.text("あなたの勝ち！(参りました)");
             ui.msg.html(getRandomMsg('lose')); 
             ui.face.text(getRandom(EMOJI_LOSING));
