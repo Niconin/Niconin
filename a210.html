@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>AI Chess - Mesugaki Ultimate (Final Ver.)</title>
+<title>AI Chess - Mesugaki Ultimate (Complete Ver.)</title>
 
 <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
 
@@ -518,7 +518,7 @@ const msgDict = {
   ],
   hint: [
     "しょうがないなぁ…ここ動かせば？ 感謝してよね！",
-    "ほら、特別に教えてあげる。私って優しい〜♡",
+    "ほら、特別に教えてあげる。私に感謝しなさいよね！",
     "こんな手も見えないの？ 眼科行ったほうがいいよｗ",
     "次からは自分で考えなよ？ 甘えん坊さんなんだから。",
     "ここだよここ！ まったく、世話が焼けるなぁ。"
@@ -542,7 +542,7 @@ $('#volume-slider').on('input', function() {
     masterVolume = val / 100;
     $('#vol-display').text(val + '%');
     
-    // スライダー操作時にAudioContextが無ければ作る(ユーザーアクションなので許可されやすい)
+    // スライダー操作時にAudioContextが無ければ作る
     if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if(audioCtx.state === 'suspended') audioCtx.resume();
 });
@@ -565,14 +565,40 @@ function playSound(type) {
   }
 
   const t = audioCtx.currentTime;
+
+  // === 勝利音（ファンファーレ）の処理 ===
+  if (type === 'win') {
+    // Cメジャーのアルペジオ (C4, E4, G4, C5)
+    const notes = [523.25, 659.25, 783.99, 1046.50];
+    notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.type = 'triangle'; // 音楽的な音色
+        osc.frequency.value = freq;
+
+        const start = t + (i * 0.1); // ずらして鳴らす
+        const duration = 0.4;
+
+        gain.gain.setValueAtTime(0, start);
+        gain.gain.linearRampToValueAtTime(masterVolume, start + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.01, start + duration);
+
+        osc.start(start);
+        osc.stop(start + duration);
+    });
+    return; // ここで終了
+  }
+
+  // === 通常の効果音（単音） ===
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
   
   osc.connect(gain);
   gain.connect(audioCtx.destination);
   
-  // masterVolume を基準に各音の大きさを調整
-  // move: 基準, capture: 1.3倍, start: 基準
   let vol = masterVolume;
   
   if (type === 'move') {
@@ -591,7 +617,6 @@ function playSound(type) {
     osc.frequency.setValueAtTime(200, t); 
     osc.frequency.exponentialRampToValueAtTime(50, t + 0.2);
     
-    // キャプチャは少し強調するが、最大1.0を超えないように
     let capVol = Math.min(vol * 1.3, 1.0);
     gain.gain.setValueAtTime(capVol, t); 
     gain.gain.linearRampToValueAtTime(0.01, t + 0.2);
@@ -1039,6 +1064,7 @@ function updateStatus(lastMove) {
             ui.msg.html(getRandomMsg('lose')); 
             ui.face.text(getRandom(EMOJI_LOSING));
             shootConfetti(); 
+            playSound('win'); // 勝利ファンファーレ
         }
     } else {
         ui.status.text("引き分け");
