@@ -14,7 +14,7 @@
 
 <link rel="manifest" id="dynamic-manifest">
 
-<title>AI Chess - Ultimate M Final Edition Ver.3.0.0</title>
+<title>AI Chess - Ultimate M Final Edition Ver.3.2.0</title>
 
 <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
 
@@ -285,6 +285,18 @@
     background: #a5d6a7;
     border-radius: 3px;
   }
+  
+  /* チェックボックスのスタイル（バイブレーション用） */
+  .toggle-container {
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; box-sizing:border-box;
+    margin-bottom: 5px;
+  }
+  input[type=checkbox] {
+    transform: scale(1.5);
+    margin-left: 10px;
+    cursor: pointer;
+  }
 
   /* === 盤面のハイライト演出 === */
   .highlight-move { background: radial-gradient(circle, rgba(46, 204, 113, 0.7) 20%, transparent 20%); }
@@ -418,12 +430,19 @@
         </div>
       </div>
 
-      <div style="width:100%; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; box-sizing:border-box;">
+      <div style="width:100%; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; box-sizing:border-box; margin-bottom: 10px;">
         <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
             <span style="font-weight:bold;">🔊 音量</span>
             <span id="vol-display" style="font-weight:bold; color:#a5d6a7;">30%</span>
         </div>
         <input type="range" id="volume-slider" min="0" max="100" value="30">
+      </div>
+
+      <div class="toggle-container">
+        <span style="font-weight:bold;">📳 バイブレーション</span>
+        <label>
+            <input type="checkbox" id="vib-toggle" checked>
+        </label>
       </div>
 
       <button class="menu-btn" onclick="startGame()">🎮 ゲームスタート！</button>
@@ -581,6 +600,8 @@ let audioCtx = null;
 let masterVolume = 0.3; // 初期音量: 30%
 let currentDragHover = null; 
 let dragSimGame = null;
+// === バイブレーション用変数 ===
+let isVibration = true;
 
 // === レイアウト調整用スクリプト ===
 function adjustLayout() {
@@ -704,8 +725,8 @@ const msgDict = {
 function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function getRandomMsg(key) { return getRandom(msgDict[key] || ["..."]); }
 
-// === 音声関連の初期化 ===
-// メニューのスライダー操作イベント
+// === 音声・振動の初期化 ===
+// 音量スライダー
 $('#volume-slider').on('input', function() {
     const val = $(this).val();
     masterVolume = val / 100;
@@ -715,6 +736,37 @@ $('#volume-slider').on('input', function() {
     if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if(audioCtx.state === 'suspended') audioCtx.resume();
 });
+
+// バイブレーションスイッチ
+$('#vib-toggle').change(function() {
+    isVibration = $(this).is(':checked');
+});
+
+// === バイブレーション実行関数 ===
+function triggerVib(type) {
+    if (!isVibration || !navigator.vibrate) return; // 設定OFFまたは非対応なら何もしない
+
+    switch(type) {
+        case 'move':
+            navigator.vibrate(20); // 軽い振動
+            break;
+        case 'capture':
+            navigator.vibrate(50); // 駒取り：少し強め
+            break;
+        case 'invalid':
+            navigator.vibrate([50, 50, 50]); // 反則：ブブッ
+            break;
+        case 'check':
+            navigator.vibrate(100); // 王手：重めの振動
+            break;
+        case 'win':
+            navigator.vibrate([100, 50, 100, 50, 200]); // 勝利：ファンファーレ風
+            break;
+        case 'lose':
+            navigator.vibrate([200, 100, 300]); // 敗北：ズーン
+            break;
+    }
+}
 
 function initAudio() { 
   if(!audioCtx) {
@@ -935,6 +987,7 @@ function startGame() {
   initAudio(); playSound('start');
   playerColor = $('#color-select').val();
   aiLevel = parseInt($('#level').val());
+  // バイブレーション設定は即時反映済み
   $('#menu').addClass('hidden');
   game.reset(); isAuto = false; clearTimeout(autoTimer); $('#board').empty();
   ui.btnRetry.addClass('hidden'); ui.btnAuto.show().removeClass('hidden'); ui.btnHint.show().removeClass('btn-disabled').prop('disabled',false); ui.btnUndo.show().removeClass('btn-disabled').prop('disabled',false);
@@ -971,6 +1024,7 @@ function makeAiMove() {
   if (m) {
     const res = game.move(m); board.position(game.fen());
     playSound(res.flags.includes('c')?'capture':'move');
+    triggerVib(res.flags.includes('c')?'capture':'move'); // AIの指し手で振動
     updateTurnMessage(res); updateStatus(res); gameLoop(); 
   }
 }
@@ -1022,10 +1076,12 @@ function onDrop(source, target) {
   if (move === null) {
     if (wasInCheck) ui.msg.text(getRandomMsg('ignoreCheck')); 
     else ui.msg.text(getRandomMsg('invalidMove')); 
+    triggerVib('invalid'); // 反則手で振動
     return 'snapback'; 
   }
 
   playSound(move.flags.includes('c') ? 'capture' : 'move');
+  triggerVib(move.flags.includes('c') ? 'capture' : 'move'); // 自分の手で振動
     
   updateTurnMessage(move);
   updateStatus(move);
@@ -1286,12 +1342,14 @@ function updateStatus(lastMove) {
             ui.status.text("あなたの負け (ざぁこ♡)");
             ui.msg.html(getRandomMsg('win')); 
             ui.face.text(getRandom(EMOJI_WINNING));
+            triggerVib('lose'); // 敗北振動
         } else {
             ui.status.text("あなたの勝ち！(参りました)");
             ui.msg.html(getRandomMsg('lose')); 
             ui.face.text(getRandom(EMOJI_LOSING));
             shootConfetti(); 
-            playSound('win'); // 勝利ファンファーレ
+            playSound('win'); 
+            triggerVib('win'); // 勝利振動
         }
     } else {
         ui.status.text("引き分け");
@@ -1309,6 +1367,7 @@ function updateStatus(lastMove) {
       if (game.in_check()) {
           ui.face.text(EMOJI_SCARED);
           ui.boardWrap.addClass('in-check-danger');
+          triggerVib('check'); // 王手振動
       } else {
           ui.face.text(isAuto ? EMOJI_ROBOT : EMOJI_SELF);
           ui.boardWrap.removeClass('in-check-danger');
@@ -1334,6 +1393,7 @@ function updateStatus(lastMove) {
           if (game.in_check()) {
                ui.face.text("😵‍💫"); 
                ui.boardWrap.addClass('in-check-danger');
+               triggerVib('check'); // 王手振動
                return;
           }
           if (lastMove.flags.includes('c')) {
@@ -1402,5 +1462,6 @@ function removeHighlights() {
   $('#board [class*="square"]').removeClass('highlight-move highlight-capture highlight-hint');
 }
 </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"119f2fbc921941548be538fc51023465","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>
