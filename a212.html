@@ -3,7 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>AI Chess - Mesugaki Ultimate (Final Ver.)</title>
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AI Chess">
+<meta name="theme-color" content="#134E5E">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23134E5E%22 rx=%2220%22/><text x=%2250%22 y=%2250%22 font-size=%2260%22 text-anchor=%22middle%22 dominant-baseline=%22central%22>♚</text></svg>">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23134E5E%22 rx=%2220%22/><text x=%2250%22 y=%2250%22 font-size=%2260%22 text-anchor=%22middle%22 dominant-baseline=%22central%22>♚</text></svg>">
+
+<link rel="manifest" href='data:application/manifest+json;base64,eyJkZXNjcmlwdGlvbiI6IkFJIENoZXNzIE1lc3VnYWtpIFZlcnNpb24iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImljb25zIjpbeyJzcmMiOiJkYXRhOmltYWdlL3N2Zyt4bWwsPHN2ZyB4bWxucz0lMjJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyUyMiB2aWV3Qm94PSUyMjAgMCAxMDAgMTAwJTIyPjxyZWN0IHdpZHRoPSUyMjEwMCUyMiBoZWlnaHQ9JTIyMTAwJTIyIGZpbGw9JTIyIzEzNEU1RSUyMiByeD0lMjIyMCUyMi8+PHRleHQgeD0lMjI1MCUyMiB5PSUyMjUwJTIyIGZvbnQtc2l6ZT0lMjI2MCUyMiB0ZXh0LWFuY2hvcj0lMjJtaWRkbGUlMjIgZG9taW5hbnQtYmFzZWxpbmU9JTIyY2VudHJhbCUyMj7imZg8L3RleHQ+PC9zdmc+Iiwic2l6ZXMiOiIxOTJ4MTkyIiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV0sIm5hbWUiOiJBSSBDaGVzcyIsIm9yaWVudGF0aW9uIjoicG9ydHJhaXQiLCJzaG9ydF9uYW1lIjoiQUkgQ2hlc3MiLCJzdGFydF91cmwiOiIuIiwidGhlbWVfY29xvciIjEzNEU1RSIsImJhY2tncm91bmRfY29sb3IiOiIjMTM0RTVFIn0='>
+
+<title>AI Chess - Ultimate Edition</title>
 
 <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
 
@@ -330,9 +341,9 @@
         <div style="flex:1;">
           <p style="font-weight:bold;">レベル</p>
           <select id="level" style="width:100%; padding:8px;">
-            <option value="1">🌱 入門</option>
-            <option value="2">🌲 中級</option>
-            <option value="3" selected>🐉 超級</option>
+            <option value="1" selected>🌱 入門 (雑魚)</option>
+            <option value="2">🌲 中級 (普通)</option>
+            <option value="3">🐉 超級 (最強)</option>
           </select>
         </div>
       </div>
@@ -346,6 +357,7 @@
       </div>
 
       <button class="menu-btn" onclick="startGame()">🎮 ゲームスタート！</button>
+      <p style="font-size:0.8em; margin-top:10px; opacity:0.8;">※ブラウザメニューから<br>「ホーム画面に追加」でアプリ化できます</p>
     </div>
   </div>
 
@@ -431,7 +443,7 @@ window.oncontextmenu = function(event) {
 // === グローバル変数定義 ===
 const game = new Chess();
 let board = null;
-let aiLevel = 3; 
+let aiLevel = 1; // デフォルトは入門
 let isAuto = false;
 let autoTimer = null;
 let playerColor = 'w';
@@ -568,99 +580,72 @@ $('#volume-slider').on('input', function() {
     const val = $(this).val();
     masterVolume = val / 100;
     $('#vol-display').text(val + '%');
-    
-    // スライダー操作時にAudioContextが無ければ作る
     if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if(audioCtx.state === 'suspended') audioCtx.resume();
 });
 
 function initAudio() { 
-  if(!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if(audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if(audioCtx.state === 'suspended') audioCtx.resume();
 }
 
 function playSound(type) {
   if(!audioCtx) return;
-  if(masterVolume <= 0) return; // ミュート時は処理しない
+  if(masterVolume <= 0) return;
   
-  if(audioCtx.state === 'suspended') {
-      audioCtx.resume();
-  }
-
+  if(audioCtx.state === 'suspended') audioCtx.resume();
   const t = audioCtx.currentTime;
 
-  // === 勝利音（ファンファーレ）の処理 ===
   if (type === 'win') {
-    // Cメジャーのアルペジオ (C4, E4, G4, C5)
     const notes = [523.25, 659.25, 783.99, 1046.50];
     notes.forEach((freq, i) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
         gain.connect(audioCtx.destination);
-
-        osc.type = 'triangle'; // 音楽的な音色
+        osc.type = 'triangle'; 
         osc.frequency.value = freq;
-
-        const start = t + (i * 0.1); // ずらして鳴らす
+        const start = t + (i * 0.1); 
         const duration = 0.4;
-
         gain.gain.setValueAtTime(0, start);
         gain.gain.linearRampToValueAtTime(masterVolume, start + 0.05);
         gain.gain.exponentialRampToValueAtTime(0.01, start + duration);
-
         osc.start(start);
         osc.stop(start + duration);
     });
-    return; // ここで終了
+    return;
   }
 
-  // === 通常の効果音（単音） ===
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
-  
   osc.connect(gain);
   gain.connect(audioCtx.destination);
-  
   let vol = masterVolume;
   
   if (type === 'move') {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(300, t); 
     osc.frequency.exponentialRampToValueAtTime(100, t + 0.15);
-    
     gain.gain.setValueAtTime(vol, t); 
     gain.gain.linearRampToValueAtTime(0.01, t + 0.15);
-    
-    osc.start(t); 
-    osc.stop(t + 0.15);
+    osc.start(t); osc.stop(t + 0.15);
   } 
   else if (type === 'capture') {
     osc.type = 'triangle'; 
     osc.frequency.setValueAtTime(200, t); 
     osc.frequency.exponentialRampToValueAtTime(50, t + 0.2);
-    
     let capVol = Math.min(vol * 1.3, 1.0);
     gain.gain.setValueAtTime(capVol, t); 
     gain.gain.linearRampToValueAtTime(0.01, t + 0.2);
-    
-    osc.start(t); 
-    osc.stop(t + 0.2);
+    osc.start(t); osc.stop(t + 0.2);
   } 
   else if (type === 'start') {
     osc.type = 'sine';
     osc.frequency.setValueAtTime(440, t); 
     osc.frequency.linearRampToValueAtTime(880, t + 0.4);
-    
     gain.gain.setValueAtTime(vol, t); 
     gain.gain.linearRampToValueAtTime(0, t + 0.6);
-    
-    osc.start(t); 
-    osc.stop(t + 0.6);
+    osc.start(t); osc.stop(t + 0.6);
   }
 }
 
@@ -749,13 +734,20 @@ function getBestMove(levelOverride) {
   const moves = game.moves({ verbose: true });
   if (!moves.length) return null;
     
+  // === レベル1: 入門 (激弱) ===
+  // 70%の確率で完全ランダム、30%の確率で単純な駒取りがあればそれを選ぶ
+  // 深読みは一切しないのでボカスカ殴れる
   if (currentLevel === 1) {
-    if(Math.random()<0.5) return getRandom(moves);
+    if(Math.random() < 0.7) return getRandom(moves);
     const captures = moves.filter(m => m.flags.includes('c'));
     return captures.length ? getRandom(captures) : getRandom(moves);
   }
     
+  // === レベル設定に応じた探索深さ ===
+  // レベル2(中級): 深さ2 (相手の応手まで読む)
+  // レベル3(超級): 深さ3 (その次の自分の手まで読む)
   const depth = (currentLevel === 2) ? 2 : 3;
+  
   const isWhite = (game.turn() === 'w');
   let bestMove = null; 
   let bestVal = isWhite ? -Infinity : Infinity;
@@ -1137,13 +1129,13 @@ function toggleAutoPlay() {
     removeHighlights();
     ui.btnHint.prop('disabled', true).addClass('btn-disabled');
     ui.btnUndo.prop('disabled', true).addClass('btn-disabled');
-    ui.btnAuto.addClass('btn-auto-active').text("🤖 オート: ON"); // 修正箇所
+    ui.btnAuto.addClass('btn-auto-active').text("🤖 オート: ON"); 
     ui.msg.text(getRandomMsg('autoOn'));
     gameLoop();
   } else {
     ui.btnHint.prop('disabled', false).removeClass('btn-disabled');
     ui.btnUndo.prop('disabled', false).removeClass('btn-disabled');
-    ui.btnAuto.removeClass('btn-auto-active').text("🤖 オート: OFF"); // 修正箇所
+    ui.btnAuto.removeClass('btn-auto-active').text("🤖 オート: OFF"); 
     clearTimeout(autoTimer);
     if (game.turn() === playerColor) ui.msg.text("やっと自分でやる気になった？");
     else ui.msg.text("私の番だけど？");
