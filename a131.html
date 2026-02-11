@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>AI Chess - Mesugaki Ultimate (Fixed)</title>
+
+<link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+
+<style>
+  /* === 全体設定 === */
+  body {
+    margin: 0;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #134E5E, #71B280);
+    height: 100vh; /* 画面の高さに固定 */
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    overflow: hidden; /* 画面全体のスクロールを禁止 */
+  }
+
+  /* === メインのコンテナボックス === */
+  .box {
+    background: rgba(255, 255, 255, 0.95);
+    color: #333;
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    display: flex;
+    gap: 20px;
+    max-width: 950px;
+    width: 95%;
+    max-height: 98vh; /* 画面からはみ出さないように制限 */
+    position: relative;
+    box-sizing: border-box;
+  }
+
+  /* === 盤面エリア === */
+  .board-section {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+  .board-wrap {
+    border: 5px solid #2E7D32;
+    border-radius: 4px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    width: 100%;
+    max-width: 60vh; /* 縦画面でも盤面が大きくなりすぎないように */
+    aspect-ratio: 1 / 1;
+    position: relative;
+    transition: box-shadow 0.3s, border-color 0.3s;
+    /* ★重要: タッチ操作時のブラウザ標準動作（スクロール等）を無効化 */
+    touch-action: none; 
+  }
+  
+  /* チェスボード自体の設定 */
+  #board {
+    width: 100%;
+    height: 100%;
+    /* ★重要: これがないとスマホでドラッグ時に画面が動く */
+    touch-action: none; 
+  }
+    
+  /* 王手（チェック）時の赤枠演出 */
+  .in-check-danger {
+    border-color: #c0392b !important; 
+    box-shadow: 0 0 25px rgba(192, 57, 43, 0.8) !important;
+  }
+
+  /* === 情報エリア（右側） === */
+  .info-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    overflow-y: auto; /* 縦が足りない場合のみ内部スクロール */
+  }
+
+  /* === キャラクターアイコン === */
+  .mascot {
+    font-size: 50px;
+    background: #fff;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 4px solid #ccc;
+    margin-bottom: 5px;
+    flex-shrink: 0; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    transition: 0.3s;
+  }
+    
+  .active-turn {
+    border-color: #2ecc71 !important;
+    box-shadow: 0 0 25px rgba(46, 204, 113, 1.0) !important;
+    transform: scale(1.05);
+  }
+
+  /* === 形勢判断ゲージ === */
+  .eval-gauge-container {
+    width: 100%;
+    height: 8px;
+    background: #555;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    flex-shrink: 0;
+  }
+  .eval-bar-white { height: 100%; background: #2ecc71; width: 50%; transition: width 0.5s ease-out; }
+  .eval-bar-black { height: 100%; background: #e74c3c; width: 50%; }
+
+  /* === 吹き出し & ルール === */
+  .bubble {
+    position: relative;
+    background: #ecf0f1;
+    color: #2c3e50;
+    border-radius: 12px;
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 10px;
+    min-height: 60px; 
+    font-size: 13px;
+    box-sizing: border-box;
+    border: 2px solid #bdc3c7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-weight: bold;
+    flex-shrink: 0;
+  }
+  .bubble::after {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 12px solid transparent;
+    border-bottom-color: #bdc3c7;
+  }
+      
+  /* ルール説明エリア */
+  .sidebar-rules {
+    width: 100%;
+    background: #f1f8e9;
+    border: 1px solid #c5e1a5;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 5px;
+    font-size: 0.75em;
+    color: #33691e;
+    box-sizing: border-box;
+    text-align: left;
+    overflow-y: auto;
+    flex-grow: 1; /* 余ったスペースを埋める */
+    min-height: 0; /* Flex内スクロール用 */
+  }
+  .sidebar-rules h4 { margin: 0 0 3px 0; border-bottom: 1px solid #aed581; padding-bottom: 2px; }
+  .sidebar-rules ul { margin: 0; padding-left: 15px; }
+  .sidebar-rules li { margin-bottom: 2px; }
+
+  /* === ボタン類 === */
+  .btn-group { 
+    width: 100%; 
+    display: flex; flex-direction: column; 
+    gap: 5px; 
+    margin-top: auto; 
+    flex-shrink: 0;
+  }
+  .btn {
+    border: none; 
+    padding: 10px; 
+    border-radius: 6px; 
+    font-weight: bold; 
+    cursor: pointer; 
+    width: 100%; 
+    color: white; 
+    transition: 0.2s; 
+    font-size: 13px;
+  }
+  .btn-hint { background: #e67e22; } .btn-hint:hover { background: #d35400; }
+  .btn-undo { background: #9b59b6; } .btn-undo:hover { background: #8e44ad; } 
+  .btn-auto { background: #2ecc71; } .btn-auto:hover { background: #27ae60; }
+  .btn-auto-active { background: #e74c3c !important; }
+  .btn-retry { background: #3498db; } .btn-retry:hover { background: #2980b9; }
+  .btn-reset { background: #95a5a6; } .btn-reset:hover { background: #7f8c8d; }
+  .btn-disabled { background: #bdc3c7 !important; cursor: not-allowed; opacity: 0.6; }
+  .hidden { display: none !important; }
+
+  /* === オーバーレイ（メニュー画面） === */
+  .overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(20, 50, 30, 0.98); 
+    z-index: 100; 
+    display: flex; 
+    flex-direction: column; justify-content: center; align-items: center; 
+    color: #fff; 
+    border-radius: 15px; 
+    padding: 20px; 
+    box-sizing: border-box;
+  }
+  .menu-btn {
+    background: #2ecc71; color: #fff; font-weight: bold; cursor: pointer; margin-top: 30px;
+    padding: 15px 30px; font-size: 18px; border:none; border-radius: 5px; width: 100%;
+  }
+
+  /* === 盤面のハイライト演出 === */
+  .highlight-move { background: radial-gradient(circle, rgba(46, 204, 113, 0.7) 20%, transparent 20%); }
+  .highlight-capture { background-color: rgba(231, 76, 60, 0.5) !important; box-shadow: inset 0 0 0 4px rgba(192, 57, 43, 0.9) !important; }
+  .highlight-danger-source { 
+    background-color: rgba(255, 120, 0, 0.85) !important; 
+    box-shadow: inset 0 0 15px rgba(255, 50, 0, 0.8) !important; 
+    animation: flash-orange 1.2s infinite alternate;
+    z-index: 10; 
+  }
+  @keyframes flash-orange { from { opacity: 0.8; } to { opacity: 1.0; } }
+  .highlight-hint { 
+    background: rgba(255, 235, 59, 0.7); 
+    box-shadow: inset 0 0 10px rgba(255, 215, 0, 1.0); 
+    animation: flash-yellow 0.8s infinite alternate; 
+  }
+  @keyframes flash-yellow { from { opacity: 0.6; } to { opacity: 1.0; } }
+
+  /* === レスポンシブ対応（スマホ向け） === */
+  @media(max-width:768px){
+    body { 
+        padding: 0; 
+        align-items: flex-start; /* 上詰め */
+    }
+    .box { 
+        flex-direction: column; 
+        height: 100vh; /* 画面いっぱい */
+        max-height: 100vh;
+        width: 100%; 
+        border-radius: 0; 
+        padding: 5px; /* 余白削減 */
+        margin: 0; 
+        gap: 5px;
+    }
+    
+    /* 情報エリアを上に配置 */
+    .info-section { 
+        order: -1; 
+        width:100%; 
+        padding: 2px;
+        flex-direction: row; /* 横並びにして省スペース化 */
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        flex: 0 0 auto; /* 高さを固定 */
+    } 
+    
+    .mascot { width: 50px; height: 50px; font-size: 30px; margin: 0; }
+    .status-wrap { display: flex; flex-direction: column; justify-content: center; flex: 1; }
+    .eval-gauge-container { margin-bottom: 5px; height: 6px; }
+    #status { font-size: 1em; margin-bottom: 0; text-align: center; }
+
+    /* 吹き出しを小さく */
+    .bubble { 
+        width: 100%; 
+        margin: 5px 0; 
+        min-height: 40px; 
+        padding: 5px; 
+        font-size: 12px;
+        order: 3; /* 一番下へ */
+    }
+    .bubble::after { display: none; } /* しっぽ削除 */
+
+    /* 盤面エリア */
+    .board-section { 
+        flex: 1; /* 残りのスペースを使う */
+        padding: 0;
+        justify-content: flex-start;
+    }
+    /* 盤面サイズ調整：画面幅に合わせて正方形を維持 */
+    .board-wrap { 
+        width: 100%; 
+        max-width: 95vw; /* 画面幅の95% */
+        height: auto; 
+        aspect-ratio: 1/1; 
+    }
+    
+    /* スマホではルール説明を完全に隠す（スペース確保） */
+    .sidebar-rules { display: none; }
+    
+    /* ボタンエリア */
+    .btn-group {
+        flex-direction: row; /* 横並び */
+        flex-wrap: wrap;
+    }
+    .btn { width: 48%; font-size: 11px; padding: 8px; flex: 1; }
+  }
+</style>
+</head>
+<body>
+
+<div class="box">
+  <div id="menu" class="overlay">
+    <div style="width:100%; max-width:400px; text-align:center;">
+      <h1 style="font-size:2.5em; margin:0 0 20px 0;">♚ AI Chess</h1>
+      <a href="a10.html">Ver.0.1.0へ</a><a href="a115.html">Ver.1.1.5へ</a>
+      <div style="display:flex; gap:20px; width:100%;">
+        <div style="flex:1;">
+          <p style="font-weight:bold;">色</p>
+          <select id="color-select" style="width:100%; padding:8px;">
+              <option value="w">♔ 先手 (白)</option>
+              <option value="b">♚ 後手 (黒)</option>
+          </select>
+        </div>
+        <div style="flex:1;">
+          <p style="font-weight:bold;">レベル</p>
+          <select id="level" style="width:100%; padding:8px;">
+            <option value="1">🌱 入門 (雑魚)</option>
+            <option value="2">🌲 中級 (普通)</option>
+            <option value="3" selected>🐉 超級 (最強)</option>
+          </select>
+        </div>
+      </div>
+      <button class="menu-btn" onclick="startGame()">🎮 ゲームスタート！</button>
+    </div>
+  </div>
+
+  <div class="board-section">
+    <div class="board-wrap">
+        <div id="board"></div>
+    </div>
+  </div>
+
+  <div class="info-section">
+    <div class="mascot" id="face">😐</div>
+    
+    <div class="status-wrap" style="width: 100%; max-width: 300px;">
+        <div class="eval-gauge-container">
+            <div id="eval-bar-white" class="eval-bar-white"></div>
+            <div id="eval-bar-black" class="eval-bar-black" style="background:#555; width:0;"></div>
+        </div>
+        <div id="status" style="font-weight:bold; font-size: 1.2em;">準備中...</div>
+    </div>
+
+    <div class="bubble" id="msg">設定を選んでスタートしてね！</div>
+    
+    <div class="sidebar-rules">
+        <h4>📜 ざこざこルール</h4>
+        <ul>
+            <li>王様(キング)を詰ませば勝ち♥</li>
+            <li>駒はドラッグで動かしてね。</li>
+        </ul>
+        <div style="font-size:0.9em; margin-top:5px; line-height:1.4;">
+            <b>♙ポーン</b>: 前1歩。敵は斜め。<br>
+            <b>♘ナイト</b>: L字ジャンプ。<br>
+            <b>♗ビショップ</b>: 斜め。<br>
+            <b>♖ルーク</b>: 縦横。<br>
+            <b>♕クイーン</b>: 縦横斜め。<br>
+            <b>♔キング</b>: 周囲1歩。
+        </div>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-hint" id="btn-hint" onclick="showHint()">💡 ヒント</button>
+      <button class="btn btn-undo" id="btn-undo" onclick="undoMove()">↩️ 待った</button>
+      <button class="btn btn-auto" id="btn-auto" onclick="toggleAutoPlay()">🤖 オート</button>
+      <button class="btn btn-retry hidden" id="btn-retry" onclick="startGame()">🔄 再戦</button>
+      <button class="btn btn-reset" onclick="location.reload()">🏠 戻る</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+
+<script>
+// === グローバル変数定義 ===
+const game = new Chess();
+let board = null;
+let aiLevel = 3; 
+let isAuto = false;
+let autoTimer = null;
+let playerColor = 'w';
+let audioCtx = null;
+let currentDragHover = null; 
+
+// ★改修: ドラッグ中の重い処理を軽減するためのキャッシュ
+let dragSimGame = null;
+
+// === メスガキ・キャラ定義 ===
+const EMOJI_SELF = "🧙‍♂️"; 
+const EMOJI_ROBOT = "🤖"; 
+const EMOJI_SCARED = "😱"; 
+const EMOJI_ENEMY_NORMAL = ["😏", "🥴", "😗"];
+const EMOJI_ENEMY_THINK = ["🤔", "🤨", "😶"]; 
+const EMOJI_ENEMY_WIN = ["😆", "🤣", "😈", "🤪"];
+const EMOJI_ENEMY_LOSE = ["😭", "😡", "🤯", "🤢"];
+const EMOJI_ENEMY_CHECK = ["🤭", "😎", "🔪"];
+
+const ui = { 
+  face: $('#face'), msg: $('#msg'), status: $('#status'), 
+  btnAuto: $('#btn-auto'), btnHint: $('#btn-hint'), btnUndo: $('#btn-undo'), btnRetry: $('#btn-retry'), 
+  evalWhite: $('#eval-bar-white'), boardWrap: $('.board-wrap') 
+};
+
+const pieceNames = { p: "ポーン", n: "ナイト", b: "ビショップ", r: "ルーク", q: "クイーン", k: "キング" };
+
+const msgDict = {
+  start: ["へぇ、私に挑むんだ？ 100年早いんじゃない？", "雑魚狩りの時間だ〜♥", "手加減なしでボコボコにしてあげる♪"],
+  invalidMove: ["は？ そこはルール違反だってばｗ", "ルールも知らないの？ ざーこ♥", "ちゃんと駒の動き覚えなよ〜"],
+  ignoreCheck: ["バ〜カ！ 王様取られちゃうよ？", "王手かかってるの！ 目ついてる？", "負けたいのかな？ｗ"],
+  captureByPlayer: (p) => [`あーあ、${p}が取られちゃった...`, `ふん、${p}くらいくれてやるよ。`, `調子に乗らないでよね、たかが${p}だし！`],
+  captureByEnemy: (p) => [`いただき〜♥ あんたの${p}、弱すぎｗ`, `不用心だねぇ〜ｗ ${p}は没収！`, `あ〜あ、${p}減っちゃったｗ ざまあｗ`],
+  checkByPlayer: ["うっ...生意気な！", "ぐぬぬ...まだ詰まないし！", "ちょっと！ びっくりするじゃん！"],
+  checkByEnemy: ["王手〜♪ 気づいてた？ｗ", "ほらほら、逃げないと終わっちゃうよ？", "次で終わりかもね〜♥"],
+  moveByPlayer_Even: ["ふーん、そう動くんだ。", "へぇ...悪くないかも？", "もっといい手あったんじゃない？ｗ", "必死だねぇ〜ｗ"],
+  moveByPlayer_AiWinning: ["無駄な抵抗ご苦労さま〜ｗ", "ねえ、まだ続けるの？ 早く降参しなよｗ", "その手、何の意味があるの？", "あがけばあがくほど惨めだねぇｗ"],
+  moveByPlayer_AiLosing: ["ぐぬぬ…調子乗るなよ？", "ま、まぐれでしょ、まぐれ！", "うざ…なんでそんな手が見えるわけ？", "くっ…まだ負けてないし！"],
+  moveByEnemy_Even: ["これならどう？", "私のターン！", "これでイチコロだよ♪", "計算通りだし〜"],
+  moveByEnemy_AiWinning: ["はい、これで詰みじゃない？ｗ", "もう終わりが見えてきたね〜", "絶望しなさい♪", "弱い弱い、弱すぎるよ〜ｗ"],
+  moveByEnemy_AiLosing: ["まだ…まだ逆転できるし…！", "本気出すから覚悟しなさいよ！", "うぅ…なんでこうなるの…", "諦めないもん！"],
+  win: ["はい私の勝ち〜！ 弱すぎｗ", "ざ〜こ♥ ざ〜こ♥", "出直してきなさい！"],
+  lose: ["うそ...負けた...？", "ぐぬぬ...次は絶対勝つから！", "覚えときなさいよ！"],
+  draw: ["ちっ、引き分けか...", "逃げ切ったつもり？", "つまんないのー"],
+  autoOn: ["は？ ロボットに頼るの？ ダッサｗ", "自分で勝てないからって機械頼り？", "プライドないの〜？ ざーこｗ"],
+  autoResumeMe: ["あれ？ ロボットくんクビ？ｗ", "ほら、自分の番だよ？ 逃げないでよね！", "やっと自分でやる気になった？"],
+  autoResumeEnemy: ["相手（私）が考えてる途中だからちょっと待ってなさいよ。", "ロボットくん待機中〜。", "あ、逃げたｗ"],
+  hint: ["ほら、ここ動かせば？ 特別サービスだからね！", "しょうがないなぁ...今回だけだよ？", "こんな手も見えないの？ 視野狭すぎｗ"],
+  undo: ["待った？ 往生際が悪いなぁ...", "えー、ずるくない？ ま、いいけどｗ", "はいはい、見なかったことにしてあげる。"]
+};
+
+function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function getRandomMsg(cat, param) { 
+    const entry = msgDict[cat];
+    if (typeof entry === 'function') return getRandom(entry(param));
+    return getRandom(entry || ["..."]); 
+}
+
+function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); }
+function playSound(type) {
+  if(!audioCtx) return;
+  const t = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  
+  if (type === 'move') {
+    osc.frequency.setValueAtTime(180, t); osc.frequency.exponentialRampToValueAtTime(40, t+0.12);
+    gain.gain.setValueAtTime(0.4, t); gain.gain.exponentialRampToValueAtTime(0.01, t+0.12);
+    osc.start(t); osc.stop(t+0.12);
+  } else if (type === 'capture') {
+    osc.type = 'triangle'; osc.frequency.setValueAtTime(350, t); osc.frequency.exponentialRampToValueAtTime(60, t+0.15);
+    gain.gain.setValueAtTime(0.4, t); gain.gain.exponentialRampToValueAtTime(0.01, t+0.15);
+    osc.start(t); osc.stop(t+0.15);
+  } else if (type === 'start') {
+    osc.frequency.setValueAtTime(440, t); osc.frequency.linearRampToValueAtTime(880, t+0.3);
+    gain.gain.setValueAtTime(0.1, t); gain.gain.linearRampToValueAtTime(0, t+0.5);
+    osc.start(t); osc.stop(t+0.5);
+  }
+}
+
+// === AI関連 ===
+const PST={
+    p:[0,0,0,0,0,0,0,0,50,50,50,50,50,50,50,50,10,10,20,30,30,20,10,10,5,5,10,25,25,10,5,5,0,0,0,20,20,0,0,0,5,-5,-10,0,0,-10,-5,5,5,10,10,-20,-20,10,10,5,0,0,0,0,0,0,0,0],
+    n:[-50,-40,-30,-30,-30,-30,-40,-50,-40,-20,0,0,0,0,-20,-40,-30,0,10,15,15,10,0,-30,-30,5,15,20,20,15,5,-30,-30,0,15,20,20,15,0,-30,-30,5,10,15,15,10,5,-30,-40,-20,0,5,5,0,-20,-40,-50,-40,-30,-30,-30,-30,-40,-50],
+    b:[-20,-10,-10,-10,-10,-10,-10,-20,-10,0,0,0,0,0,0,-10,-10,0,5,10,10,5,0,-10,-10,5,5,10,10,5,5,-10,-10,0,10,10,10,10,0,-10,-10,10,10,10,10,10,10,-10,-10,5,0,0,0,0,5,-10,-20,-10,-10,-10,-10,-10,-10,-20],
+    r:[0,0,0,0,0,0,0,0,5,10,10,10,10,10,10,5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,-5,0,0,0,0,0,0,-5,0,0,0,5,5,0,0,0],
+    q:[-20,-10,-10,-5,-5,-10,-10,-20,-10,0,0,0,0,0,0,-10,-10,0,5,5,5,5,0,-10,-5,0,5,5,5,5,0,-5,0,0,5,5,5,5,0,-5,-10,5,5,5,5,5,0,-10,-10,0,5,0,0,0,0,-10,-20,-10,-10,-5,-5,-10,-10,-20],
+    k:[-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-30,-40,-40,-50,-50,-40,-40,-30,-20,-30,-30,-40,-40,-30,-30,-20,-10,-20,-20,-20,-20,-20,-20,-10,20,20,0,0,0,0,20,20,20,30,10,0,0,10,30,20]
+};
+const VAL={p:100,n:320,b:330,r:500,q:900,k:20000};
+
+function getBoardValue(g) {
+  let v = 0; const b = g.board();
+  for(let r=0; r<8; r++) for(let c=0; c<8; c++) {
+    const p = b[r][c];
+    if(p) {
+      let score = VAL[p.type] + (PST[p.type][p.color==='w'?(r*8+c):((7-r)*8+c)]||0);
+      v += (p.color==='w' ? score : -score);
+    }
+  }
+  return v;
+}
+
+function orderMoves(moves) {
+  return moves.sort((a,b)=>{
+    let sA=0,sB=0;
+    if(a.flags.includes('c')) sA+=10+(VAL[a.captured]||0)-(VAL[a.piece]||0)/10;
+    if(a.flags.includes('p')) sA+=100;
+    if(b.flags.includes('c')) sB+=10+(VAL[b.captured]||0)-(VAL[b.piece]||0)/10;
+    if(b.flags.includes('p')) sB+=100;
+    return sB-sA;
+  });
+}
+
+function minimax(g, depth, alpha, beta, isMax) {
+  if (depth===0 || g.game_over()) return getBoardValue(g);
+  let moves = orderMoves(g.moves({ verbose: true }));
+  if(moves.length === 0) return getBoardValue(g);
+  
+  if (isMax) {
+    let maxEval = -Infinity;
+    for (let m of moves) {
+      g.move(m); 
+      let eval = minimax(g, depth-1, alpha, beta, false); 
+      g.undo();
+      maxEval = Math.max(maxEval, eval); 
+      alpha = Math.max(alpha, eval);
+      if (beta <= alpha) break;
+    }
+    return maxEval;
+  } else {
+    let minEval = Infinity;
+    for (let m of moves) {
+      g.move(m); 
+      let eval = minimax(g, depth-1, alpha, beta, true); 
+      g.undo();
+      minEval = Math.min(minEval, eval); 
+      beta = Math.min(beta, eval);
+      if (beta <= alpha) break;
+    }
+    return minEval;
+  }
+}
+
+function getBestMove(levelOverride) {
+  const currentLevel = levelOverride || aiLevel;
+  const moves = game.moves({ verbose: true });
+  if (!moves.length) return null;
+  
+  if (currentLevel === 1) {
+    if(Math.random()<0.5) return getRandom(moves);
+    const captures = moves.filter(m => m.flags.includes('c'));
+    return captures.length ? getRandom(captures) : getRandom(moves);
+  }
+  
+  const depth = (currentLevel === 2) ? 2 : 3;
+  const isWhite = (game.turn() === 'w');
+  let bestMove = null; 
+  let bestVal = isWhite ? -Infinity : Infinity;
+  const orderedMoves = orderMoves(moves);
+  
+  for(let m of orderedMoves) {
+    game.move(m);
+    let val = minimax(game, depth - 1, -Infinity, Infinity, !isWhite);
+    game.undo();
+    if(isWhite) { if(val > bestVal) { bestVal = val; bestMove = m; } }
+    else { if(val < bestVal) { bestVal = val; bestMove = m; } }
+  }
+  return bestMove || getRandom(moves);
+}
+
+// === ゲーム進行ロジック ===
+function startGame() {
+  initAudio(); playSound('start');
+  playerColor = $('#color-select').val();
+  aiLevel = parseInt($('#level').val());
+  $('#menu').addClass('hidden');
+  game.reset(); 
+  isAuto = false; 
+  clearTimeout(autoTimer);
+  $('#board').empty();
+  
+  const orient = playerColor==='w'?'white':'black';
+  const pieceTheme = p => {
+    const c = p[0]==='w'?'#fff':'#000', s = p[0]==='w'?'#000':'#fff';
+    const sym = {'P':'♙','N':'♘','B':'♗','R':'♖','Q':'♕','K':'♔','p':'♟','n':'♞','b':'♝','r':'♜','q':'♛','k':'♚'};
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><text x="50%" y="58%" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="50" fill="${c}" stroke="${s}" stroke-width="1.5">${sym[p[1]]||'?'}</text></svg>`);
+  };
+
+  board = Chessboard('board', {
+    draggable: true, 
+    position: 'start', 
+    orientation: orient, 
+    pieceTheme: pieceTheme,
+    onDragStart: onDragStart, 
+    onDragMove: onDragMove, 
+    onDrop: onDrop, 
+    onSnapEnd: onSnapEnd
+  });
+  
+  $(window).resize(board.resize);
+  ui.msg.text(getRandomMsg('start'));
+  ui.btnAuto.removeClass('btn-auto-active').text("🤖 オート: OFF");
+  updateStatus();
+  gameLoop();
+}
+
+function gameLoop() {
+  clearTimeout(autoTimer);
+  if(game.game_over()) return;
+
+  const myTurn = (game.turn() === playerColor);
+  if (myTurn && !isAuto) return;
+  
+  autoTimer = setTimeout(() => {
+    makeAiMove();
+  }, 600);
+}
+
+function makeAiMove() {
+  if (game.game_over()) return;
+
+  const turnColor = game.turn();
+  const isEnemy = (turnColor !== playerColor);
+  const useLevel = isEnemy ? aiLevel : 3;
+  
+  const m = getBestMove(useLevel);
+  if (m) {
+    const moveResult = game.move(m);
+    board.position(game.fen());
+    playSound(moveResult.flags.includes('c') ? 'capture' : 'move');
+    updateTurnMessage(moveResult, false); 
+    updateStatus();
+    gameLoop(); 
+  }
+}
+
+// === プレイヤー操作イベント ===
+function onDragStart(source, piece) {
+  if (game.game_over() || isAuto) return false;
+  if (game.turn() !== playerColor) return false;
+  if ((playerColor === 'w' && piece.search(/^b/) !== -1) || (playerColor === 'b' && piece.search(/^w/) !== -1)) return false;
+  
+  const moves = game.moves({ square: source, verbose: true });
+  if (moves.length === 0) return false;
+
+  // ★軽量化: ドラッグ開始時にシミュレーション用のゲームインスタンスを一度だけ作成
+  dragSimGame = new Chess(game.fen());
+
+  removeHighlights();
+  moves.forEach(m => {
+    $('#board .square-' + m.to).addClass(m.flags.includes('c') ? 'highlight-capture' : 'highlight-move');
+  });
+}
+
+function onDragMove(newLocation, oldLocation, source, piece) {
+  if (newLocation === currentDragHover) return; 
+  currentDragHover = newLocation;
+  
+  // ★軽量化: 具体的なクラス名を指定せずに削除
+  $('#board .highlight-danger-source').removeClass('highlight-danger-source');
+  
+  if (newLocation === 'offboard') return;
+
+  // ★軽量化: 毎回 new Chess() せずに、dragSimGame を再利用（状態をリセット）
+  // chess.jsのload()はnew Chess()より少し軽いが、頻繁な生成は避ける
+  // ここでは logic の重さが主原因になりうるため、シミュレーションは慎重に
+  // ただ、一番の「カクつき」原因はスクロールイベントとの競合なので、touch-action:noneでほぼ解決する
+  
+  // 安全のためリセットしてから使う
+  dragSimGame.load(game.fen());
+
+  const move = dragSimGame.move({ from: source, to: newLocation, promotion: 'q' });
+  if (move) {
+      const enemyMoves = dragSimGame.moves({ verbose: true });
+      const attackers = enemyMoves.filter(m => m.to === newLocation);
+      if (attackers.length > 0) {
+        attackers.forEach(m => $('#board .square-' + m.from).addClass('highlight-danger-source'));
+      }
+  }
+}
+
+function onDrop(source, target) {
+  removeHighlights();
+  $('.highlight-danger-source').removeClass('highlight-danger-source');
+  
+  const wasInCheck = game.in_check();
+  const move = game.move({ from: source, to: target, promotion: 'q' });
+
+  if (move === null) {
+    if (wasInCheck) ui.msg.text(getRandomMsg('ignoreCheck')); 
+    else ui.msg.text(getRandomMsg('invalidMove')); 
+    return 'snapback'; 
+  }
+
+  playSound(move.flags.includes('c') ? 'capture' : 'move');
+  updateTurnMessage(move, true);
+  updateStatus();
+  gameLoop();
+}
+
+function onSnapEnd() { board.position(game.fen()); }
+
+function updateTurnMessage(move, isPlayerMove) {
+    if (game.game_over()) return; 
+
+    if (game.in_check()) {
+        ui.msg.text(isPlayerMove ? getRandomMsg('checkByPlayer') : getRandomMsg('checkByEnemy'));
+        return;
+    }
+
+    if (move.flags.includes('c')) {
+        const pieceName = pieceNames[move.captured] || "駒";
+        ui.msg.text(isPlayerMove ? getRandomMsg('captureByPlayer', pieceName) : getRandomMsg('captureByEnemy', pieceName));
+        return;
+    }
+
+    const rawScore = getBoardValue(game);
+    const aiAdvantage = (playerColor === 'w') ? -rawScore : rawScore;
+    let situationSuffix = "_Even";
+    if (aiAdvantage > 300) situationSuffix = "_AiWinning";
+    else if (aiAdvantage < -300) situationSuffix = "_AiLosing";
+
+    const msgKey = (isPlayerMove ? "moveByPlayer" : "moveByEnemy") + situationSuffix;
+    ui.msg.text(getRandomMsg(msgKey));
+}
+
+function updateStatus() {
+  const score = getBoardValue(game);
+  const pct = (1 / (1 + Math.exp(-score / 500))) * 100;
+  ui.evalWhite.css('width', pct + '%');
+  
+  const isMyTurn = (game.turn() === playerColor);
+  if (isMyTurn) ui.face.addClass('active-turn');
+  else ui.face.removeClass('active-turn');
+  
+  ui.status.text(isMyTurn ? "あなたの番" : "相手の番");
+  if(board) board.draggable = (isMyTurn && !isAuto && !game.game_over());
+
+  if(game.game_over()) {
+    ui.btnRetry.removeClass('hidden'); ui.btnAuto.hide(); ui.btnHint.hide(); ui.btnUndo.hide(); ui.status.text("決着！");
+    if(game.in_checkmate()) {
+        const iWon = (game.turn()==='b' && playerColor==='w') || (game.turn()==='w' && playerColor==='b');
+        ui.msg.html(iWon ? getRandomMsg('win') : getRandomMsg('lose'));
+        ui.face.text(iWon ? getRandom(EMOJI_ENEMY_LOSE) : getRandom(EMOJI_ENEMY_WIN));
+    } else {
+        ui.msg.text(getRandomMsg('draw'));
+        ui.face.text(getRandom(EMOJI_ENEMY_NORMAL));
+    }
+    return;
+  }
+  
+  if(game.in_check()) {
+    if(isMyTurn) { 
+       ui.face.text(EMOJI_SCARED);
+       ui.boardWrap.addClass('in-check-danger');
+    } else { 
+       ui.face.text(getRandom(EMOJI_ENEMY_CHECK));
+       ui.boardWrap.addClass('in-check-danger');
+    }
+  } 
+  else {
+    ui.boardWrap.removeClass('in-check-danger');
+    if(isMyTurn) {
+       ui.face.text(isAuto ? EMOJI_ROBOT : EMOJI_SELF);
+    } else {
+       ui.face.text(getRandom(EMOJI_ENEMY_THINK)); 
+    }
+  }
+}
+
+function toggleAutoPlay() {
+  if(game.game_over()) return;
+  isAuto = !isAuto;
+  
+  if(isAuto) {
+    removeHighlights();
+    ui.btnHint.prop('disabled', true).addClass('btn-disabled');
+    ui.btnUndo.prop('disabled', true).addClass('btn-disabled');
+    ui.btnAuto.addClass('btn-auto-active').text("🤖 ON");
+    ui.msg.text(getRandomMsg('autoOn'));
+    gameLoop();
+  } else {
+    ui.btnHint.prop('disabled', false).removeClass('btn-disabled');
+    ui.btnUndo.prop('disabled', false).removeClass('btn-disabled');
+    ui.btnAuto.removeClass('btn-auto-active').text("🤖 OFF");
+    clearTimeout(autoTimer);
+    if (game.turn() === playerColor) {
+        ui.msg.text(getRandomMsg('autoResumeMe'));
+    } else {
+        ui.msg.text(getRandomMsg('autoResumeEnemy'));
+    }
+    if(game.turn() !== playerColor) {
+       gameLoop(); 
+    }
+    updateStatus();
+  }
+}
+
+function undoMove() {
+  if(!isAuto && !game.game_over() && game.turn()===playerColor && game.history().length>=2) {
+    game.undo(); game.undo(); 
+    board.position(game.fen()); 
+    removeHighlights();
+    $('.highlight-danger-source').removeClass('highlight-danger-source'); 
+    ui.msg.text(getRandomMsg('undo')); 
+    updateStatus();
+  }
+}
+
+function showHint() {
+  if(game.turn()!==playerColor || isAuto) return;
+  ui.msg.text("ヒント？ しょうがないなぁ...");
+  setTimeout(() => {
+      const m = getBestMove(3); 
+      if(m) {
+          const obj = game.move(m); game.undo();
+          $('#board .square-'+obj.from).addClass('highlight-hint');
+          $('#board .square-'+obj.to).addClass('highlight-hint');
+          ui.msg.text(getRandomMsg('hint'));
+      }
+  }, 100);
+}
+
+function removeHighlights() {
+  $('#board [class*="square"]').removeClass('highlight-move highlight-capture highlight-hint');
+}
+</script>
+</body>
+</html>
