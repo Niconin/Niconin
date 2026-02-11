@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -14,7 +14,7 @@
 
 <link rel="manifest" id="dynamic-manifest">
 
-<title>AI Chess - Ultimate Edition</title>
+<title>AI Chess - Ultimate M Final Edition Ver.3.0.0</title>
 
 <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
 
@@ -303,22 +303,93 @@
   }
   @keyframes flash-yellow { from { opacity: 0.6; } to { opacity: 1.0; } }
 
-  /* === レスポンシブ対応 === */
+  /* === インストールバナー === */
+  #install-banner {
+    display: none; background: #fff; color: #333; padding: 10px; 
+    border-radius: 8px; margin-top: 15px; text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  }
+
+  /* === 【修正】レスポンシブ対応: スマホレイアウト最適化 === */
   @media(max-width:768px){
-    body { padding: 5px; align-items: flex-start; height: auto; }
-    .box { flex-direction: column; height: auto; min-height: 0; width: 100%; padding: 8px; margin: 0; gap: 10px; }
-    .info-section { order: -1; width:100%; padding: 0; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 10px; flex: 0 0 auto; } 
+    body { 
+        padding: 0; /* 【修正】画面端の隙間を削除 */
+        align-items: flex-start; 
+        height: auto; 
+    }
+    .box { 
+        flex-direction: column; 
+        height: auto; 
+        min-height: 100vh; /* 【修正】画面いっぱいに広げる */
+        width: 100%; 
+        padding: 10px; 
+        margin: 0; 
+        gap: 15px; 
+        border-radius: 0; /* 【修正】スマホでは角丸なし */
+        box-shadow: none;
+    }
+    
+    /* 情報エリア: 要素を中央揃え */
+    .info-section { 
+        order: -1; 
+        width:100%; 
+        padding: 0; 
+        flex-direction: row; 
+        flex-wrap: wrap; 
+        justify-content: center; 
+        gap: 10px; 
+        flex: 0 0 auto; 
+    } 
+      
     .mascot { width: 50px; height: 50px; font-size: 30px; margin: 0; }
     .status-wrap { display: flex; flex-direction: column; justify-content: center; flex: 1; }
     .eval-gauge-container { margin-bottom: 5px; height: 6px; }
     #status { font-size: 1em; margin-bottom: 0; text-align: center; }
-    .bubble { width: 100%; margin: 5px 0; min-height: 50px; padding: 8px; font-size: 12px; order: 3; }
-    .bubble::after { display: none; }
-    .board-section { flex: 0 0 auto; padding: 0; justify-content: flex-start; margin-bottom: 10px; }
-    .board-wrap { width: 100%; max-width: 90vw; height: auto; aspect-ratio: 1/1; }
-    .btn-group { flex-direction: row; flex-wrap: wrap; margin-bottom: 15px; }
-    .btn { width: 48%; font-size: 11px; padding: 10px; flex: 1; }
-    .sidebar-rules { width: 100%; max-height: none; overflow-y: visible; margin-top: 0; }
+
+    /* 吹き出し */
+    .bubble { 
+        width: 100%; 
+        margin: 5px 0; 
+        min-height: 50px; 
+        padding: 8px; 
+        font-size: 12px; 
+        order: 3; 
+    }
+    .bubble::after { display: none; } /* しっぽ削除 */
+
+    /* 盤面エリア: はみ出し防止 */
+    .board-section { 
+        flex: 0 0 auto; 
+        padding: 0; 
+        justify-content: flex-start; 
+        margin-bottom: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    .board-wrap { 
+        width: 100%; 
+        max-width: 92vw; /* 【修正】少し余裕を持たせる */
+        height: auto; 
+        aspect-ratio: 1/1; 
+    }
+      
+    /* ボタンエリア: 2列配置 */
+    .btn-group {
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+    }
+    .btn { width: 48%; font-size: 12px; padding: 12px; flex: 1 0 40%; }
+
+    /* ルール表示: スクロール解除して一番下に */
+    .sidebar-rules {
+      width: 100%;
+      max-height: none; 
+      overflow-y: visible;
+      margin-top: 0;
+      margin-bottom: 50px; /* 一番下に余裕 */
+    }
     .sidebar-rules h4 { font-size: 1.1em; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 4px; }
   }
 </style>
@@ -341,8 +412,7 @@
         <div style="flex:1;">
           <p style="font-weight:bold;">レベル</p>
           <select id="level" style="width:100%; padding:8px;">
-            <option value="1" selected>🌱 入門 (雑魚)</option>
-            <option value="2">🌲 中級 (普通)</option>
+            <option value="1" selected>🌱 入門 (雑魚)</option> <option value="2">🌲 中級 (普通)</option>
             <option value="3">🐉 超級 (最強)</option>
           </select>
         </div>
@@ -357,7 +427,11 @@
       </div>
 
       <button class="menu-btn" onclick="startGame()">🎮 ゲームスタート！</button>
-      <p style="font-size:0.8em; margin-top:10px; opacity:0.8;">※ブラウザメニューから<br>「ホーム画面に追加」でアプリ化できます</p>
+      
+      <div id="install-banner">
+        <p style="margin:0 0 5px 0; font-size:0.9em;">アプリとしてインストールできます</p>
+        <button id="install-btn" class="btn" style="background:#333;">⬇️ ホーム画面に追加</button>
+      </div>
     </div>
   </div>
 
@@ -434,16 +508,14 @@
 
 <script>
 (function() {
-  // 1. アイコン画像 (SVG) の定義
   const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#134E5E" rx="20"/><text x="50" y="50" font-size="60" text-anchor="middle" dominant-baseline="central">♚</text></svg>`;
   const iconUrl = "data:image/svg+xml," + encodeURIComponent(iconSvg);
 
-  // 2. マニフェストファイル (Web App Manifest) の動的生成
   const manifest = {
     "name": "AI Chess",
     "short_name": "Chess",
     "start_url": ".",
-    "display": "standalone", // アドレスバーを消す設定
+    "display": "standalone",
     "background_color": "#134E5E",
     "theme_color": "#134E5E",
     "orientation": "portrait",
@@ -452,38 +524,40 @@
       { "src": iconUrl, "sizes": "512x512", "type": "image/svg+xml" }
     ]
   };
-  
-  // JSONをBlob化してURLを生成し、Linkタグにセット
   const stringManifest = JSON.stringify(manifest);
   const blobManifest = new Blob([stringManifest], {type: 'application/json'});
   const manifestURL = URL.createObjectURL(blobManifest);
   document.getElementById('dynamic-manifest').setAttribute('href', manifestURL);
 
-  // 3. Service Worker の動的生成と登録
-  // 通常は sw.js という別ファイルが必要ですが、Blobを使ってメモリ上で仮想ファイルを作ります
   if ('serviceWorker' in navigator) {
     const swCode = `
-      // インストール時にキャッシュ等は今回省略（シンプル構成）
-      self.addEventListener('install', (e) => {
-        self.skipWaiting();
-      });
-      self.addEventListener('activate', (e) => {
-        e.waitUntil(self.clients.claim());
-      });
-      // オフラインでも動作するようにフェッチイベントをハンドル
-      self.addEventListener('fetch', (e) => {
-        e.respondWith(fetch(e.request));
-      });
+      self.addEventListener('install', (e) => { self.skipWaiting(); });
+      self.addEventListener('activate', (e) => { e.waitUntil(self.clients.claim()); });
+      self.addEventListener('fetch', (e) => { e.respondWith(fetch(e.request)); });
     `;
     const blobSw = new Blob([swCode], {type: 'text/javascript'});
     const swUrl = URL.createObjectURL(blobSw);
-    
-    // 仮想URLのService Workerを登録
     navigator.serviceWorker.register(swUrl)
-      .then(reg => console.log('PWA Service Worker Registered', reg))
-      .catch(err => console.log('PWA Service Worker Failed', err));
+      .then(reg => console.log('SW OK'))
+      .catch(err => console.log('SW Fail', err));
   }
 })();
+
+let deferredPrompt;
+const installBanner = document.getElementById('install-banner');
+const installBtn = document.getElementById('install-btn');
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  installBanner.style.display = 'block';
+});
+installBtn.addEventListener('click', (e) => {
+  installBanner.style.display = 'none';
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => { deferredPrompt = null; });
+  }
+});
 </script>
 
 <script>
@@ -499,7 +573,7 @@ window.oncontextmenu = function(event) {
 // === グローバル変数定義 ===
 const game = new Chess();
 let board = null;
-let aiLevel = 1; // デフォルトは入門
+let aiLevel = 1; 
 let isAuto = false;
 let autoTimer = null;
 let playerColor = 'w';
@@ -816,22 +890,37 @@ function getBestMove(levelOverride) {
   const currentLevel = levelOverride || aiLevel;
   const moves = game.moves({ verbose: true });
   if (!moves.length) return null;
-    
-  // === 入門(Lv1): 激弱 ===
+  
+  // === 【修正】入門(Lv1): 接待モード（最悪手を必ず選ぶ） ===
   if (currentLevel === 1) {
-    if(Math.random() < 0.7) return getRandom(moves);
-    const captures = moves.filter(m => m.flags.includes('c'));
-    return captures.length ? getRandom(captures) : getRandom(moves);
+    const isWhite = (game.turn() === 'w');
+    let worstMove = null;
+    let worstVal = isWhite ? Infinity : -Infinity;
+    
+    // 全ての手を検証し、自分の評価値が最も悪くなる手を探す
+    for (let m of moves) {
+      game.move(m);
+      const val = getBoardValue(game); 
+      game.undo();
+      
+      if (isWhite) {
+        // 白番: 評価値が最小（＝黒有利）の手を選ぶ
+        if (val < worstVal) { worstVal = val; worstMove = m; }
+      } else {
+        // 黒番: 評価値が最大（＝白有利）の手を選ぶ
+        if (val > worstVal) { worstVal = val; worstMove = m; }
+      }
+    }
+    // ランダム要素を排除し、必ず最悪手を返す
+    return worstMove || moves[0];
   }
   
-  // === 中級(Lv2) / 超級(Lv3) ===
+  // === 中級・超級 ===
   const depth = (currentLevel === 2) ? 2 : 3;
   const isWhite = (game.turn() === 'w');
   let bestMove = null; 
   let bestVal = isWhite ? -Infinity : Infinity;
-  const orderedMoves = orderMoves(moves);
-    
-  for(let m of orderedMoves) {
+  for(let m of orderMoves(moves)) {
     game.move(m);
     let val = minimax(game, depth - 1, -Infinity, Infinity, !isWhite);
     game.undo();
@@ -843,81 +932,46 @@ function getBestMove(levelOverride) {
 
 // === ゲーム進行ロジック ===
 function startGame() {
-  initAudio(); 
-  playSound('start');
+  initAudio(); playSound('start');
   playerColor = $('#color-select').val();
   aiLevel = parseInt($('#level').val());
   $('#menu').addClass('hidden');
-  game.reset(); 
-  isAuto = false; 
-  clearTimeout(autoTimer);
-  $('#board').empty();
-    
-  ui.btnRetry.addClass('hidden');
-  ui.btnAuto.show().removeClass('hidden');
-  ui.btnHint.show().removeClass('hidden').prop('disabled', false).removeClass('btn-disabled');
-  ui.btnUndo.show().removeClass('hidden').prop('disabled', false).removeClass('btn-disabled');
-    
+  game.reset(); isAuto = false; clearTimeout(autoTimer); $('#board').empty();
+  ui.btnRetry.addClass('hidden'); ui.btnAuto.show().removeClass('hidden'); ui.btnHint.show().removeClass('btn-disabled').prop('disabled',false); ui.btnUndo.show().removeClass('btn-disabled').prop('disabled',false);
+  
   const orient = playerColor==='w'?'white':'black';
   const pieceTheme = p => {
     const c = p[0]==='w'?'#fff':'#000', s = p[0]==='w'?'#000':'#fff';
     const sym = {'P':'♙','N':'♘','B':'♗','R':'♖','Q':'♕','K':'♔','p':'♟','n':'♞','b':'♝','r':'♜','q':'♛','k':'♚'};
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><text x="50%" y="58%" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-size="50" fill="${c}" stroke="${s}" stroke-width="1.5">${sym[p[1]]||'?'}</text></svg>`);
   };
-
-  board = Chessboard('board', {
-    draggable: true, 
-    position: 'start', 
-    orientation: orient, 
-    pieceTheme: pieceTheme,
-    onDragStart: onDragStart, 
-    onDragMove: onDragMove, 
-    onDrop: onDrop, 
-    onSnapEnd: onSnapEnd
-  });
-    
+  board = Chessboard('board', {draggable:true, position:'start', orientation:orient, pieceTheme:pieceTheme, onDragStart:onDragStart, onDragMove:onDragMove, onDrop:onDrop, onSnapEnd:onSnapEnd});
   $(window).resize(board.resize);
   ui.msg.text(getRandomMsg('start'));
   ui.btnAuto.removeClass('btn-auto-active').text("🤖 オート: OFF");
   updateStatus(null);
-  
   adjustLayout();
-    
-  if (playerColor === 'b') {
-      gameLoop();
-  }
+  if (playerColor === 'b') gameLoop();
 }
 
 function gameLoop() {
   clearTimeout(autoTimer);
   if(game.game_over()) return;
-
   const myTurn = (game.turn() === playerColor);
   if (myTurn && !isAuto) return;
-    
-  autoTimer = setTimeout(() => {
-    makeAiMove();
-  }, 600);
+  autoTimer = setTimeout(makeAiMove, 600);
 }
 
 function makeAiMove() {
   if (game.game_over()) return;
-
   const turnColor = game.turn();
   const isEnemy = (turnColor !== playerColor);
-  const useLevel = isEnemy ? aiLevel : 3;
-    
+  const useLevel = isEnemy ? aiLevel : 3; 
   const m = getBestMove(useLevel);
   if (m) {
-    const moveResult = game.move(m);
-    board.position(game.fen());
-    
-    playSound(moveResult.flags.includes('c') ? 'capture' : 'move');
-      
-    updateTurnMessage(moveResult); 
-    updateStatus(moveResult); 
-      
-    gameLoop(); 
+    const res = game.move(m); board.position(game.fen());
+    playSound(res.flags.includes('c')?'capture':'move');
+    updateTurnMessage(res); updateStatus(res); gameLoop(); 
   }
 }
 
@@ -981,7 +1035,7 @@ function onDrop(source, target) {
 
 function onSnapEnd() { board.position(game.fen()); }
 
-// === AIの形勢判断スコアを取得 ===
+// === AIの形勢判断スコアを取得 (AI視点のスコア) ===
 function getAiScore() {
     const rawScore = getBoardValue(game);
     return (playerColor === 'w') ? -rawScore : rawScore;
@@ -992,7 +1046,8 @@ function getAiState(score) {
     return "Even";
 }
 
-// === メッセージ生成ロジック ===
+// === 【解説付きメッセージ生成ロジック】 ===
+// 全ての分岐で駒名を含めるように拡張
 function updateTurnMessage(move) {
     if (game.game_over()) return; 
 
@@ -1001,7 +1056,7 @@ function updateTurnMessage(move) {
     const pieceName = pieceNamesMesu[move.piece] || '駒';
     const isPlayerSideMove = (move.color === playerColor);
       
-    // --- プレイヤー側が動かした時 ---
+    // --- プレイヤー側（味方）が動かした時 ---
     if (isPlayerSideMove) {
         if (game.in_check()) {
             if (state === "Winning") {
@@ -1065,19 +1120,52 @@ function updateTurnMessage(move) {
                 `調子に乗って${pieceName}を進化させちゃって…潰してやる！`
             ]));
         } else {
-            // 通常移動
+            // 通常移動の解説（駒ごとの分岐）
             const phrases = {
-                'p': [`${pieceName}をちょこちょこ進めて…可愛いねぇｗ`, `${pieceName}進めて何になるの？`],
-                'n': [`${pieceName}がピョンピョン跳ねて…うざい。`, `${pieceName}の動き、読みづらいかも…。`],
-                'b': [`斜めから${pieceName}で狙ってる？ バレバレだよ〜ｗ`, `その${pieceName}、視線を感じる…。`],
-                'r': [`縦横無尽に${pieceName}を動かす気？ 単純だねぇ。`, `${pieceName}の突破力に頼っちゃって。`],
-                'q': [`出た、${pieceName}頼み！ 初心者あるあるだねｗ`, `最強の${pieceName}を動かして満足？`],
-                'k': [`王様（${pieceName}）自らお散歩？ 余裕ないねぇｗ`, `${pieceName}が逃げ回ってるｗ`]
+                'p': [
+                    `${pieceName}をちょこちょこ進めて…可愛いねぇｗ`,
+                    `その${pieceName}、進めて何になるの？ ぷぷっ`,
+                    `じわじわ${pieceName}で攻める気？ 性格暗そうｗ`
+                ],
+                'n': [
+                    `${pieceName}がピョンピョン跳ねて…うざい動きだなぁ。`,
+                    `その${pieceName}の動き、ちょっと読みづらいかも…。`,
+                    `変な動きの${pieceName}だね。馬鹿にしてる？`
+                ],
+                'b': [
+                    `斜めから${pieceName}で狙ってる？ バレバレだよ〜ｗ`,
+                    `その${pieceName}、遠くから視線を感じるわね…。`,
+                    `${pieceName}をスッと通してきたか。`
+                ],
+                'r': [
+                    `縦横無尽に${pieceName}を動かす気？ 単純だねぇ。`,
+                    `${pieceName}の突破力に頼っちゃって。脳筋？`,
+                    `その${pieceName}、壁みたいで邪魔くさいなぁ。`
+                ],
+                'q': [
+                    `出た、${pieceName}頼み！ 初心者あるあるだねｗ`,
+                    `最強の${pieceName}を動かして満足？`,
+                    `その${pieceName}、暴れさせないからね。`
+                ],
+                'k': [
+                    `王様（${pieceName}）自らお散歩？ 余裕ないねぇｗ`,
+                    `${pieceName}が逃げ回ってるｗ みっともないよ？`,
+                    `そんな所に${pieceName}動かして大丈夫〜？`
+                ]
             };
             const pList = phrases[move.piece] || phrases['p'];
-            if (state === "Winning") ui.msg.text(getRandom(pList.map(s => s + " 無駄なあがきだけどね！")));
-            else if (state === "Losing") ui.msg.text(getRandom([`くっ…その${pieceName}の動き、嫌な予感がする…。`, `な、何その${pieceName}の手…読んでなかった…`]));
-            else ui.msg.text(getRandom(pList));
+
+            if (state === "Winning") {
+               ui.msg.text(getRandom(pList.map(s => s + " 無駄なあがきだけどね！")));
+            } else if (state === "Losing") {
+               ui.msg.text(getRandom([
+                   `くっ…その${pieceName}の動き、嫌な予感がする…。`,
+                   `な、何その${pieceName}の手…読んでなかった…`,
+                   `うぅ…${pieceName}が迫ってくる…プレッシャーかけないでよ…`
+               ]));
+            } else {
+               ui.msg.text(getRandom(pList));
+            }
         }
     } 
     // --- AI側（敵）が動かした時 ---
@@ -1087,13 +1175,15 @@ function updateTurnMessage(move) {
                  ui.msg.text(getRandom([
                      `これならどう！？ ${pieceName}で起死回生の王手！`,
                      `お願い！ ${pieceName}の攻撃、当たって！`,
-                     `くらえ！ ${pieceName}による必殺の王手！`
+                     `くらえ！ ${pieceName}による必殺の王手！`,
+                     `もうヤケクソだよ！ ${pieceName}で特攻！`
                  ]));
              } else {
                  ui.msg.text(getRandom([
                      `ほらほら、${pieceName}で王手だよ〜♡ 逃げなきゃ終わるよ？`,
                      `${pieceName}が王様の喉元にナイフ突きつけてるよ？ｗ`,
-                     `キャハハ！ ${pieceName}に追い詰められて惨め〜ｗ`
+                     `キャハハ！ ${pieceName}に追い詰められて惨め〜ｗ`,
+                     `さぁ、${pieceName}からどう逃げる？ 泣いて謝るなら許すかも？`
                  ]));
              }
         } else if (move.flags.includes('c')) {
@@ -1101,12 +1191,15 @@ function updateTurnMessage(move) {
              if (move.captured === 'q') {
                  ui.msg.text(getRandom([
                      `やった！ あんたの${captured}、私の${pieceName}でいただいちゃった〜♡`,
-                     `最強の${captured}がいなくなってどんな気持ち〜？ 私の${pieceName}すごいでしょ！`
+                     `最強の${captured}がいなくなってどんな気持ち〜？ 私の${pieceName}すごいでしょ！`,
+                     `${pieceName}で${captured}を撃破！ もう勝負ありだね！`,
+                     `あーあ、大事な${captured}を${pieceName}に捧げちゃうなんてｗ`
                  ]));
              } else {
                  ui.msg.text(getRandom([
                      `遠慮なく${captured}を${pieceName}で狩るね。隙だらけなんだもんｗ`,
                      `いただき〜！ ${pieceName}のご飯になっちゃったね、${captured}さんｗ`,
+                     `${captured}、おいしいです♡ ${pieceName}も喜んでるよ！`,
                      `お掃除完了〜！ 邪魔な${captured}は${pieceName}が消しちゃいました！`
                  ]));
              }
@@ -1114,21 +1207,56 @@ function updateTurnMessage(move) {
             ui.msg.text(getRandom([
                 `見て見て！ 私の${pieceName}が最強のクイーンになっちゃった♡`,
                 `これが${pieceName}の真の姿！ 絶望しなさい！`,
+                `進化〜！ この${pieceName}はもう誰にも止められないよね〜ｗ`,
                 `はい最強〜。${pieceName}がクイーンになった時点で詰みだよ？`
             ]));
         } else {
+            // AIの狙いを解説風に（駒ごとの分岐）
              const phrasesAi = {
-                'p': [`私の${pieceName}を進めてあげる。じわじわ苦しんでね♡`, `ほら、${pieceName}が近づいていくよ〜。`],
-                'n': [`華麗なる${pieceName}のジャンプ！ 予測できるかな？`, `私の${pieceName}はトリッキーだよ〜。`],
-                'b': [`遠距離から${pieceName}でロックオン完了♡`, `死角から${pieceName}がこんにちは！`],
-                'r': [`ドカーンと${pieceName}を進めるよ！ 道を開けなさい！`, `私の${pieceName}は重戦車なの。`],
-                'q': [`最強の${pieceName}がお出ましだ！ ひれ伏しなさい！`, `さあ、${pieceName}で蹂躙してあげる♡`],
-                'k': [`王様（${pieceName}）は高みの見物といこうかな。`, `安全な場所に${pieceName}を移動っと。`]
+                'p': [
+                    `私の${pieceName}を進めてあげる。じわじわ苦しんでね♡`,
+                    `ほら、${pieceName}が近づいていくよ〜。怖い？`,
+                    `この${pieceName}が将来化けるんだから。覚えときなよ？`
+                ],
+                'n': [
+                    `華麗なる${pieceName}のジャンプ！ 予測できるかな？`,
+                    `私の${pieceName}はトリッキーだよ〜。ついてこれる？`,
+                    `ふふっ、この${pieceName}の位置、絶妙でしょ？`
+                ],
+                'b': [
+                    `遠距離から${pieceName}でロックオン完了♡`,
+                    `死角から${pieceName}がこんにちは！`,
+                    `この${pieceName}の射線、見えてなかったでしょ？`
+                ],
+                'r': [
+                    `ドカーンと${pieceName}を進めるよ！ 道を開けなさい！`,
+                    `私の${pieceName}は重戦車なの。止められないよ？`,
+                    `この列は${pieceName}が制圧したから。`
+                ],
+                'q': [
+                    `最強の${pieceName}がお出ましだ！ ひれ伏しなさい！`,
+                    `私の${pieceName}に勝てると思ってる？`,
+                    `さあ、${pieceName}で蹂躙してあげる♡`
+                ],
+                'k': [
+                    `王様（${pieceName}）は高みの見物といこうかな。`,
+                    `安全な場所に${pieceName}を移動っと。`,
+                    `ふふん、${pieceName}は捕まらないよ〜。`
+                ]
             };
             const pListAi = phrasesAi[move.piece] || phrasesAi['p'];
-            if (state === "Winning") ui.msg.text(getRandom(pListAi.map(s => s + " 完璧すぎて怖い？")));
-            else if (state === "Losing") ui.msg.text(getRandom([`と、とりあえず${pieceName}で様子見かな…。`, `なんとか${pieceName}で逆転の糸口を…！`]));
-            else ui.msg.text(getRandom(pListAi));
+
+            if (state === "Winning") {
+                ui.msg.text(getRandom(pListAi.map(s => s + " 完璧すぎて怖い？")));
+            } else if (state === "Losing") {
+                ui.msg.text(getRandom([
+                    `と、とりあえず${pieceName}で様子見かな…。油断しないでよね！`,
+                    `まだ負けてないし！ ${pieceName}を信じてるし！`,
+                    `なんとか${pieceName}で逆転の糸口を…！`
+                ]));
+            } else {
+                ui.msg.text(getRandom(pListAi));
+            }
         }
     }
 }
@@ -1139,6 +1267,7 @@ function updateStatus(lastMove) {
   const aiScore = getAiScore();
   const aiState = getAiState(aiScore);
 
+  // 1. ゲージ更新
   const pct = (1 / (1 + Math.exp(-rawScore / 500))) * 100;
   ui.evalWhite.css('width', pct + '%');
     
@@ -1147,18 +1276,17 @@ function updateStatus(lastMove) {
   if (isMyTurn) ui.face.addClass('active-turn');
   else ui.face.removeClass('active-turn');
 
+  // A. ゲーム終了時
   if(game.game_over()) {
     ui.btnRetry.removeClass('hidden'); ui.btnAuto.hide(); ui.btnHint.hide(); ui.btnUndo.hide();
       
     if(game.in_checkmate()) {
         const playerLost = (game.turn() === playerColor);
         if (playerLost) {
-            // プレイヤーの負け
             ui.status.text("あなたの負け (ざぁこ♡)");
             ui.msg.html(getRandomMsg('win')); 
             ui.face.text(getRandom(EMOJI_WINNING));
         } else {
-            // プレイヤーの勝ち（紙吹雪発動！）
             ui.status.text("あなたの勝ち！(参りました)");
             ui.msg.html(getRandomMsg('lose')); 
             ui.face.text(getRandom(EMOJI_LOSING));
@@ -1176,6 +1304,7 @@ function updateStatus(lastMove) {
   ui.status.text(isMyTurn ? "あなたの番" : "相手の番");
   if(board) board.draggable = (isMyTurn && !isAuto && !game.game_over());
 
+  // B. プレイヤー手番中
   if (isMyTurn) {
       if (game.in_check()) {
           ui.face.text(EMOJI_SCARED);
@@ -1187,15 +1316,30 @@ function updateStatus(lastMove) {
       return;
   }
 
+  // C. AIの手番
   ui.boardWrap.removeClass('in-check-danger');
-  if (aiState === "Losing") { ui.face.text(getRandom(EMOJI_LOSING)); return; }
-  if (aiState === "Winning") { ui.face.text(getRandom(EMOJI_WINNING)); return; }
+
+  if (aiState === "Losing") {
+      ui.face.text(getRandom(EMOJI_LOSING)); 
+      return;
+  }
+  if (aiState === "Winning") {
+      ui.face.text(getRandom(EMOJI_WINNING)); 
+      return;
+  }
 
   if (lastMove) {
       const isPlayerJustMoved = (lastMove.color === playerColor);
       if (isPlayerJustMoved) {
-          if (game.in_check()) { ui.face.text("😵‍💫"); ui.boardWrap.addClass('in-check-danger'); return; }
-          if (lastMove.flags.includes('c')) { ui.face.text("😠"); return; }
+          if (game.in_check()) {
+               ui.face.text("😵‍💫"); 
+               ui.boardWrap.addClass('in-check-danger');
+               return;
+          }
+          if (lastMove.flags.includes('c')) {
+               ui.face.text("😠"); 
+               return;
+          }
       }
   }
   ui.face.text(getRandom(EMOJI_NORMAL));
@@ -1217,9 +1361,14 @@ function toggleAutoPlay() {
     ui.btnUndo.prop('disabled', false).removeClass('btn-disabled');
     ui.btnAuto.removeClass('btn-auto-active').text("🤖 オート: OFF"); 
     clearTimeout(autoTimer);
-    if (game.turn() === playerColor) ui.msg.text("やっと自分でやる気になった？");
-    else ui.msg.text("私の番だけど？");
-    if(game.turn() !== playerColor) gameLoop(); 
+    if (game.turn() === playerColor) {
+        ui.msg.text("やっと自分でやる気になった？");
+    } else {
+        ui.msg.text("私の番だけど？");
+    }
+    if(game.turn() !== playerColor) {
+       gameLoop(); 
+    }
     updateStatus(null);
   }
 }
