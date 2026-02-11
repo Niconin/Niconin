@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>AI Chess - Mesugaki Ultimate (Final)</title>
+<title>AI Chess - Ultimate M Ver. (Final)</title>
 
 <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
 
@@ -431,6 +431,7 @@
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script>
 // === グローバル変数定義 ===
@@ -444,7 +445,7 @@ let audioCtx = null;
 let currentDragHover = null; 
 let dragSimGame = null;
 
-// === レイアウト調整用スクリプト（最重要） ===
+// === レイアウト調整用スクリプト ===
 // PCでは「吹き出し→ルール→ボタン」、スマホでは「盤面→ボタン→ルール(一番下)」を実現
 function adjustLayout() {
     const isMobile = window.innerWidth <= 768;
@@ -459,7 +460,6 @@ function adjustLayout() {
         box.appendChild(rules); // ルールを一番下へ
     } else {
         // PC: ルールとボタンをInfoセクション内の元の位置に戻す
-        // Infoセクション内順序: ... -> Bubble -> Rules -> Buttons
         infoSection.appendChild(rules);
         infoSection.appendChild(btns);
     }
@@ -487,7 +487,7 @@ const pieceNamesMesu = {
     'p': 'ポーン', 'n': 'ナイト', 'b': 'ビショップ', 'r': 'ルーク', 'q': 'クイーン', 'k': 'キング'
 };
 
-// === メッセージ辞書（超増量版） ===
+// === メッセージ辞書 ===
 const msgDict = {
   start: [
     "ふ〜ん、私に勝てると思ってるんだ？ 無謀だねぇｗ",
@@ -571,30 +571,90 @@ const msgDict = {
 function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function getRandomMsg(key) { return getRandom(msgDict[key] || ["..."]); }
 
-// === 音声関連 ===
-function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); }
+// === 音声関連の修正（音量を下げました） ===
+function initAudio() { 
+  if(!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if(audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}
+
 function playSound(type) {
   if(!audioCtx) return;
+  
+  if(audioCtx.state === 'suspended') {
+      audioCtx.resume();
+  }
+
   const t = audioCtx.currentTime;
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
+  
   osc.connect(gain);
   gain.connect(audioCtx.destination);
     
-  // 音量を少し大きく調整 (0.4 -> 0.6, 0.1 -> 0.3)
+  // 音量を調整 (0.8 -> 0.3~0.5 程度に低減)
   if (type === 'move') {
-    osc.frequency.setValueAtTime(180, t); osc.frequency.exponentialRampToValueAtTime(40, t+0.12);
-    gain.gain.setValueAtTime(0.6, t); gain.gain.exponentialRampToValueAtTime(0.01, t+0.12);
-    osc.start(t); osc.stop(t+0.12);
-  } else if (type === 'capture') {
-    osc.type = 'triangle'; osc.frequency.setValueAtTime(350, t); osc.frequency.exponentialRampToValueAtTime(60, t+0.15);
-    gain.gain.setValueAtTime(0.6, t); gain.gain.exponentialRampToValueAtTime(0.01, t+0.15);
-    osc.start(t); osc.stop(t+0.15);
-  } else if (type === 'start') {
-    osc.frequency.setValueAtTime(440, t); osc.frequency.linearRampToValueAtTime(880, t+0.3);
-    gain.gain.setValueAtTime(0.3, t); gain.gain.linearRampToValueAtTime(0, t+0.5);
-    osc.start(t); osc.stop(t+0.5);
+    // コマ移動音
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(300, t); 
+    osc.frequency.exponentialRampToValueAtTime(100, t + 0.15);
+    
+    // 0.8 -> 0.3 に変更
+    gain.gain.setValueAtTime(0.3, t); 
+    gain.gain.linearRampToValueAtTime(0.01, t + 0.15);
+    
+    osc.start(t); 
+    osc.stop(t + 0.15);
+  } 
+  else if (type === 'capture') {
+    // 駒を取る音
+    osc.type = 'triangle'; 
+    osc.frequency.setValueAtTime(200, t); 
+    osc.frequency.exponentialRampToValueAtTime(50, t + 0.2);
+    
+    // 0.9 -> 0.4 に変更
+    gain.gain.setValueAtTime(0.4, t); 
+    gain.gain.linearRampToValueAtTime(0.01, t + 0.2);
+    
+    osc.start(t); 
+    osc.stop(t + 0.2);
+  } 
+  else if (type === 'start') {
+    // スタート音
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, t); 
+    osc.frequency.linearRampToValueAtTime(880, t + 0.4);
+    
+    // 0.5 -> 0.3 に変更
+    gain.gain.setValueAtTime(0.3, t); 
+    gain.gain.linearRampToValueAtTime(0, t + 0.6);
+    
+    osc.start(t); 
+    osc.stop(t + 0.6);
   }
+}
+
+// === 紙吹雪演出 ===
+function shootConfetti() {
+    var count = 200;
+    var defaults = {
+        origin: { y: 0.7 }
+    };
+
+    function fire(particleRatio, opts) {
+        confetti(Object.assign({}, defaults, opts, {
+            particleCount: Math.floor(count * particleRatio)
+        }));
+    }
+
+    fire(0.25, { spread: 26, startVelocity: 55, });
+    fire(0.2, { spread: 60, });
+    fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+    fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+    fire(0.1, { spread: 120, startVelocity: 45, });
 }
 
 // === AIロジック（MiniMax） ===
@@ -690,7 +750,8 @@ function getBestMove(levelOverride) {
 
 // === ゲーム進行ロジック ===
 function startGame() {
-  initAudio(); playSound('start');
+  initAudio(); // ユーザーのクリックイベント内で確実にAudioContextを再開
+  playSound('start');
   playerColor = $('#color-select').val();
   aiLevel = parseInt($('#level').val());
   $('#menu').addClass('hidden');
@@ -758,6 +819,8 @@ function makeAiMove() {
   if (m) {
     const moveResult = game.move(m);
     board.position(game.fen());
+    
+    // AIの移動時にも確実に音を再生
     playSound(moveResult.flags.includes('c') ? 'capture' : 'move');
       
     updateTurnMessage(moveResult); 
@@ -817,6 +880,7 @@ function onDrop(source, target) {
     return 'snapback'; 
   }
 
+  // プレイヤーの移動時に音を再生
   playSound(move.flags.includes('c') ? 'capture' : 'move');
     
   updateTurnMessage(move);
@@ -838,8 +902,7 @@ function getAiState(score) {
     return "Even";
 }
 
-// === 【解説付きメッセージ生成ロジック】 ===
-// 全ての分岐で駒名を含めるように拡張
+// === メッセージ生成ロジック ===
 function updateTurnMessage(move) {
     if (game.game_over()) return; 
 
@@ -912,52 +975,19 @@ function updateTurnMessage(move) {
                 `調子に乗って${pieceName}を進化させちゃって…潰してやる！`
             ]));
         } else {
-            // 通常移動の解説（駒ごとの分岐）
+            // 通常移動の解説
             const phrases = {
-                'p': [
-                    `${pieceName}をちょこちょこ進めて…可愛いねぇｗ`,
-                    `その${pieceName}、進めて何になるの？ ぷぷっ`,
-                    `じわじわ${pieceName}で攻める気？ 性格暗そうｗ`
-                ],
-                'n': [
-                    `${pieceName}がピョンピョン跳ねて…うざい動きだなぁ。`,
-                    `その${pieceName}の動き、ちょっと読みづらいかも…。`,
-                    `変な動きの${pieceName}だね。馬鹿にしてる？`
-                ],
-                'b': [
-                    `斜めから${pieceName}で狙ってる？ バレバレだよ〜ｗ`,
-                    `その${pieceName}、遠くから視線を感じるわね…。`,
-                    `${pieceName}をスッと通してきたか。`
-                ],
-                'r': [
-                    `縦横無尽に${pieceName}を動かす気？ 単純だねぇ。`,
-                    `${pieceName}の突破力に頼っちゃって。脳筋？`,
-                    `その${pieceName}、壁みたいで邪魔くさいなぁ。`
-                ],
-                'q': [
-                    `出た、${pieceName}頼み！ 初心者あるあるだねｗ`,
-                    `最強の${pieceName}を動かして満足？`,
-                    `その${pieceName}、暴れさせないからね。`
-                ],
-                'k': [
-                    `王様（${pieceName}）自らお散歩？ 余裕ないねぇｗ`,
-                    `${pieceName}が逃げ回ってるｗ みっともないよ？`,
-                    `そんな所に${pieceName}動かして大丈夫〜？`
-                ]
+                'p': [`${pieceName}をちょこちょこ進めて…可愛いねぇｗ`, `${pieceName}進めて何になるの？`],
+                'n': [`${pieceName}がピョンピョン跳ねて…うざい。`, `${pieceName}の動き、読みづらいかも…。`],
+                'b': [`斜めから${pieceName}で狙ってる？ バレバレだよ〜ｗ`, `その${pieceName}、視線を感じる…。`],
+                'r': [`縦横無尽に${pieceName}を動かす気？ 単純だねぇ。`, `${pieceName}の突破力に頼っちゃって。`],
+                'q': [`出た、${pieceName}頼み！ 初心者あるあるだねｗ`, `最強の${pieceName}を動かして満足？`],
+                'k': [`王様（${pieceName}）自らお散歩？ 余裕ないねぇｗ`, `${pieceName}が逃げ回ってるｗ`]
             };
             const pList = phrases[move.piece] || phrases['p'];
-
-            if (state === "Winning") {
-               ui.msg.text(getRandom(pList.map(s => s + " 無駄なあがきだけどね！")));
-            } else if (state === "Losing") {
-               ui.msg.text(getRandom([
-                   `くっ…その${pieceName}の動き、嫌な予感がする…。`,
-                   `な、何その${pieceName}の手…読んでなかった…`,
-                   `うぅ…${pieceName}が迫ってくる…プレッシャーかけないでよ…`
-               ]));
-            } else {
-               ui.msg.text(getRandom(pList));
-            }
+            if (state === "Winning") ui.msg.text(getRandom(pList.map(s => s + " 無駄なあがきだけどね！")));
+            else if (state === "Losing") ui.msg.text(getRandom([`くっ…その${pieceName}の動き、嫌な予感がする…。`, `な、何その${pieceName}の手…読んでなかった…`]));
+            else ui.msg.text(getRandom(pList));
         }
     } 
     // --- AI側（敵）が動かした時 ---
@@ -967,15 +997,13 @@ function updateTurnMessage(move) {
                  ui.msg.text(getRandom([
                      `これならどう！？ ${pieceName}で起死回生の王手！`,
                      `お願い！ ${pieceName}の攻撃、当たって！`,
-                     `くらえ！ ${pieceName}による必殺の王手！`,
-                     `もうヤケクソだよ！ ${pieceName}で特攻！`
+                     `くらえ！ ${pieceName}による必殺の王手！`
                  ]));
              } else {
                  ui.msg.text(getRandom([
                      `ほらほら、${pieceName}で王手だよ〜♡ 逃げなきゃ終わるよ？`,
                      `${pieceName}が王様の喉元にナイフ突きつけてるよ？ｗ`,
-                     `キャハハ！ ${pieceName}に追い詰められて惨め〜ｗ`,
-                     `さぁ、${pieceName}からどう逃げる？ 泣いて謝るなら許すかも？`
+                     `キャハハ！ ${pieceName}に追い詰められて惨め〜ｗ`
                  ]));
              }
         } else if (move.flags.includes('c')) {
@@ -983,15 +1011,12 @@ function updateTurnMessage(move) {
              if (move.captured === 'q') {
                  ui.msg.text(getRandom([
                      `やった！ あんたの${captured}、私の${pieceName}でいただいちゃった〜♡`,
-                     `最強の${captured}がいなくなってどんな気持ち〜？ 私の${pieceName}すごいでしょ！`,
-                     `${pieceName}で${captured}を撃破！ もう勝負ありだね！`,
-                     `あーあ、大事な${captured}を${pieceName}に捧げちゃうなんてｗ`
+                     `最強の${captured}がいなくなってどんな気持ち〜？ 私の${pieceName}すごいでしょ！`
                  ]));
              } else {
                  ui.msg.text(getRandom([
                      `遠慮なく${captured}を${pieceName}で狩るね。隙だらけなんだもんｗ`,
                      `いただき〜！ ${pieceName}のご飯になっちゃったね、${captured}さんｗ`,
-                     `${captured}、おいしいです♡ ${pieceName}も喜んでるよ！`,
                      `お掃除完了〜！ 邪魔な${captured}は${pieceName}が消しちゃいました！`
                  ]));
              }
@@ -999,56 +1024,21 @@ function updateTurnMessage(move) {
             ui.msg.text(getRandom([
                 `見て見て！ 私の${pieceName}が最強のクイーンになっちゃった♡`,
                 `これが${pieceName}の真の姿！ 絶望しなさい！`,
-                `進化〜！ この${pieceName}はもう誰にも止められないよね〜ｗ`,
                 `はい最強〜。${pieceName}がクイーンになった時点で詰みだよ？`
             ]));
         } else {
-            // AIの狙いを解説風に（駒ごとの分岐）
              const phrasesAi = {
-                'p': [
-                    `私の${pieceName}を進めてあげる。じわじわ苦しんでね♡`,
-                    `ほら、${pieceName}が近づいていくよ〜。怖い？`,
-                    `この${pieceName}が将来化けるんだから。覚えときなよ？`
-                ],
-                'n': [
-                    `華麗なる${pieceName}のジャンプ！ 予測できるかな？`,
-                    `私の${pieceName}はトリッキーだよ〜。ついてこれる？`,
-                    `ふふっ、この${pieceName}の位置、絶妙でしょ？`
-                ],
-                'b': [
-                    `遠距離から${pieceName}でロックオン完了♡`,
-                    `死角から${pieceName}がこんにちは！`,
-                    `この${pieceName}の射線、見えてなかったでしょ？`
-                ],
-                'r': [
-                    `ドカーンと${pieceName}を進めるよ！ 道を開けなさい！`,
-                    `私の${pieceName}は重戦車なの。止められないよ？`,
-                    `この列は${pieceName}が制圧したから。`
-                ],
-                'q': [
-                    `最強の${pieceName}がお出ましだ！ ひれ伏しなさい！`,
-                    `私の${pieceName}に勝てると思ってる？`,
-                    `さあ、${pieceName}で蹂躙してあげる♡`
-                ],
-                'k': [
-                    `王様（${pieceName}）は高みの見物といこうかな。`,
-                    `安全な場所に${pieceName}を移動っと。`,
-                    `ふふん、${pieceName}は捕まらないよ〜。`
-                ]
+                'p': [`私の${pieceName}を進めてあげる。じわじわ苦しんでね♡`, `ほら、${pieceName}が近づいていくよ〜。`],
+                'n': [`華麗なる${pieceName}のジャンプ！ 予測できるかな？`, `私の${pieceName}はトリッキーだよ〜。`],
+                'b': [`遠距離から${pieceName}でロックオン完了♡`, `死角から${pieceName}がこんにちは！`],
+                'r': [`ドカーンと${pieceName}を進めるよ！ 道を開けなさい！`, `私の${pieceName}は重戦車なの。`],
+                'q': [`最強の${pieceName}がお出ましだ！ ひれ伏しなさい！`, `さあ、${pieceName}で蹂躙してあげる♡`],
+                'k': [`王様（${pieceName}）は高みの見物といこうかな。`, `安全な場所に${pieceName}を移動っと。`]
             };
             const pListAi = phrasesAi[move.piece] || phrasesAi['p'];
-
-            if (state === "Winning") {
-                ui.msg.text(getRandom(pListAi.map(s => s + " 完璧すぎて怖い？")));
-            } else if (state === "Losing") {
-                ui.msg.text(getRandom([
-                    `と、とりあえず${pieceName}で様子見かな…。油断しないでよね！`,
-                    `まだ負けてないし！ ${pieceName}を信じてるし！`,
-                    `なんとか${pieceName}で逆転の糸口を…！`
-                ]));
-            } else {
-                ui.msg.text(getRandom(pListAi));
-            }
+            if (state === "Winning") ui.msg.text(getRandom(pListAi.map(s => s + " 完璧すぎて怖い？")));
+            else if (state === "Losing") ui.msg.text(getRandom([`と、とりあえず${pieceName}で様子見かな…。`, `なんとか${pieceName}で逆転の糸口を…！`]));
+            else ui.msg.text(getRandom(pListAi));
         }
     }
 }
@@ -1075,13 +1065,16 @@ function updateStatus(lastMove) {
     if(game.in_checkmate()) {
         const playerLost = (game.turn() === playerColor);
         if (playerLost) {
+            // プレイヤーの負け
             ui.status.text("あなたの負け (ざぁこ♡)");
             ui.msg.html(getRandomMsg('win')); 
             ui.face.text(getRandom(EMOJI_WINNING));
         } else {
+            // プレイヤーの勝ち（紙吹雪発動！）
             ui.status.text("あなたの勝ち！(参りました)");
             ui.msg.html(getRandomMsg('lose')); 
             ui.face.text(getRandom(EMOJI_LOSING));
+            shootConfetti(); // ここで紙吹雪
         }
     } else {
         ui.status.text("引き分け");
@@ -1119,7 +1112,6 @@ function updateStatus(lastMove) {
   }
 
   if (lastMove) {
-      // 直前の手がプレイヤー(またはオート味方)によるものだった場合、その結果を見てAIが反応する
       const isPlayerJustMoved = (lastMove.color === playerColor);
       if (isPlayerJustMoved) {
           if (game.in_check()) {
