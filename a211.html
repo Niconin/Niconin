@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>AI Chess - Mesugaki Ultimate (Complete Ver.)</title>
+<title>AI Chess - Mesugaki Ultimate (Final Ver.)</title>
 
 <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
 
@@ -21,6 +21,18 @@
     color: #fff;
     overflow-x: hidden;
     overflow-y: auto;
+    /* 全体での選択・メニュー禁止 */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none; /* iOS長押しメニュー無効化 */
+  }
+
+  /* === 画像（駒）の長押しメニューを強力に無効化 === */
+  img {
+    -webkit-touch-callout: none !important;
+    pointer-events: auto; /* ドラッグ操作は許可 */
   }
 
   /* === メインのコンテナボックス === */
@@ -56,15 +68,23 @@
     aspect-ratio: 1 / 1;
     position: relative;
     transition: box-shadow 0.3s, border-color 0.3s;
-    touch-action: none; 
+    touch-action: none; /* ブラウザのスクロール等を無効化 */
   }
       
   #board {
     width: 100%;
     height: 100%;
-    touch-action: none; 
+    /* 盤面内での長押しメニュー無効化のダメ押し */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
   }
-      
+  
+  /* chessboard.jsが生成するimgタグへの対策 */
+  #board img {
+      -webkit-touch-callout: none !important;
+      -webkit-user-drag: none; /* 一部のブラウザでゴーストが出るのを防ぐ */
+  }
+
   .in-check-danger {
     border-color: #c0392b !important; 
     box-shadow: 0 0 25px rgba(192, 57, 43, 0.8) !important;
@@ -387,7 +407,7 @@
     <div class="btn-group" id="btn-group">
       <button class="btn btn-hint" id="btn-hint" onclick="showHint()">💡 ヒント</button>
       <button class="btn btn-undo" id="btn-undo" onclick="undoMove()">↩️ 待った</button>
-      <button class="btn btn-auto" id="btn-auto" onclick="toggleAutoPlay()">🤖 オート</button>
+      <button class="btn btn-auto" id="btn-auto" onclick="toggleAutoPlay()">🤖 オート: OFF</button>
       <button class="btn btn-retry hidden" id="btn-retry" onclick="startGame()">🔄 再戦</button>
       <button class="btn btn-reset" onclick="location.reload()">🏠 戻る</button>
     </div>
@@ -401,6 +421,13 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script>
+// === 右クリック（コンテキストメニュー）無効化 ===
+window.oncontextmenu = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    return false;
+};
+
 // === グローバル変数定義 ===
 const game = new Chess();
 let board = null;
@@ -1110,13 +1137,13 @@ function toggleAutoPlay() {
     removeHighlights();
     ui.btnHint.prop('disabled', true).addClass('btn-disabled');
     ui.btnUndo.prop('disabled', true).addClass('btn-disabled');
-    ui.btnAuto.addClass('btn-auto-active').text("🤖 ON");
+    ui.btnAuto.addClass('btn-auto-active').text("🤖 オート: ON"); // 修正箇所
     ui.msg.text(getRandomMsg('autoOn'));
     gameLoop();
   } else {
     ui.btnHint.prop('disabled', false).removeClass('btn-disabled');
     ui.btnUndo.prop('disabled', false).removeClass('btn-disabled');
-    ui.btnAuto.removeClass('btn-auto-active').text("🤖 OFF");
+    ui.btnAuto.removeClass('btn-auto-active').text("🤖 オート: OFF"); // 修正箇所
     clearTimeout(autoTimer);
     if (game.turn() === playerColor) ui.msg.text("やっと自分でやる気になった？");
     else ui.msg.text("私の番だけど？");
