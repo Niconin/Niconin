@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>AI Chess - Ultimate M Ver. (Final)</title>
+<title>AI Chess - Mesugaki Ultimate (Final Ver.)</title>
 
 <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
 
@@ -77,7 +77,6 @@
     flex-direction: column;
     align-items: center;
     padding: 10px;
-    /* PC版: 上から詰めて配置 */
     justify-content: flex-start;
   }
 
@@ -159,11 +158,9 @@
     color: #33691e;
     box-sizing: border-box;
     text-align: left;
-    
-    /* PC版: 縦に伸びすぎないようにスクロールを入れるが、Flexboxで高さを自動調整 */
     flex-grow: 1; 
     overflow-y: auto; 
-    max-height: 350px; /* PCでの最大高さ制限 */
+    max-height: 350px; 
   }
   .sidebar-rules h4 { margin: 0 0 8px 0; border-bottom: 2px solid #aed581; padding-bottom: 2px; text-align: center;}
    
@@ -196,7 +193,6 @@
     width: 100%; 
     display: flex; flex-direction: column; 
     gap: 5px; 
-    /* PC版: ルールの下に配置（HTML順序通り） */
     margin-top: 5px; 
     flex-shrink: 0;
   }
@@ -233,8 +229,30 @@
     box-sizing: border-box;
   }
   .menu-btn {
-    background: #2ecc71; color: #fff; font-weight: bold; cursor: pointer; margin-top: 30px;
+    background: #2ecc71; color: #fff; font-weight: bold; cursor: pointer; margin-top: 25px;
     padding: 15px 30px; font-size: 18px; border:none; border-radius: 5px; width: 100%;
+  }
+  
+  /* スライダーのスタイル */
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    background: transparent;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 20px; width: 20px;
+    border-radius: 50%;
+    background: #fff;
+    cursor: pointer;
+    margin-top: -8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    width: 100%; height: 6px;
+    cursor: pointer;
+    background: #a5d6a7;
+    border-radius: 3px;
   }
 
   /* === 盤面のハイライト演出 === */
@@ -254,83 +272,22 @@
   }
   @keyframes flash-yellow { from { opacity: 0.6; } to { opacity: 1.0; } }
 
-  /* === レスポンシブ対応（スマホ向け） === */
+  /* === レスポンシブ対応 === */
   @media(max-width:768px){
-    body { 
-        padding: 5px; 
-        align-items: flex-start; /* 上詰め */
-        height: auto;
-    }
-    .box { 
-        flex-direction: column; 
-        height: auto;
-        min-height: 0;
-        width: 100%; 
-        border-radius: 5px; 
-        padding: 8px;
-        margin: 0; 
-        gap: 10px;
-    }
-      
-    /* 情報エリア */
-    .info-section { 
-        order: -1; 
-        width:100%; 
-        padding: 0;
-        flex-direction: row; /* 基本は横並び */
-        flex-wrap: wrap;     /* 折り返し許可 */
-        justify-content: center;
-        gap: 10px;
-        flex: 0 0 auto;
-    } 
-      
+    body { padding: 5px; align-items: flex-start; height: auto; }
+    .box { flex-direction: column; height: auto; min-height: 0; width: 100%; padding: 8px; margin: 0; gap: 10px; }
+    .info-section { order: -1; width:100%; padding: 0; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 10px; flex: 0 0 auto; } 
     .mascot { width: 50px; height: 50px; font-size: 30px; margin: 0; }
     .status-wrap { display: flex; flex-direction: column; justify-content: center; flex: 1; }
     .eval-gauge-container { margin-bottom: 5px; height: 6px; }
     #status { font-size: 1em; margin-bottom: 0; text-align: center; }
-
-    /* 吹き出し */
-    .bubble { 
-        width: 100%; 
-        margin: 5px 0; 
-        min-height: 50px; 
-        padding: 8px; 
-        font-size: 12px;
-        order: 3; /* マスコット等の次 */
-    }
-    .bubble::after { display: none; } /* しっぽ削除 */
-
-    /* 盤面エリア */
-    .board-section { 
-        flex: 0 0 auto;
-        padding: 0;
-        justify-content: flex-start;
-        margin-bottom: 10px;
-    }
-    .board-wrap { 
-        width: 100%; 
-        max-width: 90vw;
-        height: auto; 
-        aspect-ratio: 1/1; 
-    }
-      
-    /* ボタンエリア: 盤面の下 */
-    .btn-group {
-        flex-direction: row;
-        flex-wrap: wrap;
-        margin-bottom: 15px;
-        /* orderはJSによる配置換えで制御するためCSSでは指定しない、あるいは自然な順序で */
-    }
+    .bubble { width: 100%; margin: 5px 0; min-height: 50px; padding: 8px; font-size: 12px; order: 3; }
+    .bubble::after { display: none; }
+    .board-section { flex: 0 0 auto; padding: 0; justify-content: flex-start; margin-bottom: 10px; }
+    .board-wrap { width: 100%; max-width: 90vw; height: auto; aspect-ratio: 1/1; }
+    .btn-group { flex-direction: row; flex-wrap: wrap; margin-bottom: 15px; }
     .btn { width: 48%; font-size: 11px; padding: 10px; flex: 1; }
-
-    /* ルール表示: 一番下 */
-    .sidebar-rules {
-      width: 100%;
-      /* 二重スクロール防止のためheight制限解除 */
-      max-height: none; 
-      overflow-y: visible;
-      margin-top: 0;
-    }
+    .sidebar-rules { width: 100%; max-height: none; overflow-y: visible; margin-top: 0; }
     .sidebar-rules h4 { font-size: 1.1em; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 4px; }
   }
 </style>
@@ -341,7 +298,8 @@
   <div id="menu" class="overlay">
     <div style="width:100%; max-width:400px; text-align:center;">
       <h1 style="font-size:2.5em; margin:0 0 20px 0;">♚ AI Chess</h1>
-      <div style="display:flex; gap:20px; width:100%;">
+      
+      <div style="display:flex; gap:20px; width:100%; margin-bottom: 20px;">
         <div style="flex:1;">
           <p style="font-weight:bold;">色</p>
           <select id="color-select" style="width:100%; padding:8px;">
@@ -358,6 +316,15 @@
           </select>
         </div>
       </div>
+
+      <div style="width:100%; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px; box-sizing:border-box;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+            <span style="font-weight:bold;">🔊 音量</span>
+            <span id="vol-display" style="font-weight:bold; color:#a5d6a7;">30%</span>
+        </div>
+        <input type="range" id="volume-slider" min="0" max="100" value="30">
+      </div>
+
       <button class="menu-btn" onclick="startGame()">🎮 ゲームスタート！</button>
     </div>
   </div>
@@ -442,11 +409,11 @@ let isAuto = false;
 let autoTimer = null;
 let playerColor = 'w';
 let audioCtx = null;
+let masterVolume = 0.3; // 初期音量: 30%
 let currentDragHover = null; 
 let dragSimGame = null;
 
 // === レイアウト調整用スクリプト ===
-// PCでは「吹き出し→ルール→ボタン」、スマホでは「盤面→ボタン→ルール(一番下)」を実現
 function adjustLayout() {
     const isMobile = window.innerWidth <= 768;
     const box = document.getElementById('main-box');
@@ -455,11 +422,9 @@ function adjustLayout() {
     const btns = document.getElementById('btn-group');
 
     if (isMobile) {
-        // スマホ: ルールをBoxの最後尾（盤面やボタンより下）に移動
-        box.appendChild(btns); // ボタンを盤面の下へ
-        box.appendChild(rules); // ルールを一番下へ
+        box.appendChild(btns); 
+        box.appendChild(rules); 
     } else {
-        // PC: ルールとボタンをInfoセクション内の元の位置に戻す
         infoSection.appendChild(rules);
         infoSection.appendChild(btns);
     }
@@ -471,7 +436,6 @@ window.addEventListener('load', adjustLayout);
 const EMOJI_SELF = "🧙‍♂️"; 
 const EMOJI_ROBOT = "🤖"; 
 const EMOJI_SCARED = "😱"; 
-
 const EMOJI_WINNING = ["😏", "😗", "🤭", "😎", "😈", "😆", "🤪", "😝"]; 
 const EMOJI_NORMAL = ["🤔", "🤨", "🥱", "😐", "🙂", "😮", "🙄"]; 
 const EMOJI_LOSING = ["😖", "🥺", "😭", "😵‍💫", "🧊", "😡", "🤯", "🥶"]; 
@@ -571,7 +535,18 @@ const msgDict = {
 function getRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 function getRandomMsg(key) { return getRandom(msgDict[key] || ["..."]); }
 
-// === 音声関連の修正（音量を下げました） ===
+// === 音声関連の初期化 ===
+// メニューのスライダー操作イベント
+$('#volume-slider').on('input', function() {
+    const val = $(this).val();
+    masterVolume = val / 100;
+    $('#vol-display').text(val + '%');
+    
+    // スライダー操作時にAudioContextが無ければ作る(ユーザーアクションなので許可されやすい)
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+});
+
 function initAudio() { 
   if(!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -583,6 +558,7 @@ function initAudio() {
 
 function playSound(type) {
   if(!audioCtx) return;
+  if(masterVolume <= 0) return; // ミュート時は処理しない
   
   if(audioCtx.state === 'suspended') {
       audioCtx.resume();
@@ -594,42 +570,41 @@ function playSound(type) {
   
   osc.connect(gain);
   gain.connect(audioCtx.destination);
-    
-  // 音量を調整 (0.8 -> 0.3~0.5 程度に低減)
+  
+  // masterVolume を基準に各音の大きさを調整
+  // move: 基準, capture: 1.3倍, start: 基準
+  let vol = masterVolume;
+  
   if (type === 'move') {
-    // コマ移動音
     osc.type = 'sine';
     osc.frequency.setValueAtTime(300, t); 
     osc.frequency.exponentialRampToValueAtTime(100, t + 0.15);
     
-    // 0.8 -> 0.3 に変更
-    gain.gain.setValueAtTime(0.3, t); 
+    gain.gain.setValueAtTime(vol, t); 
     gain.gain.linearRampToValueAtTime(0.01, t + 0.15);
     
     osc.start(t); 
     osc.stop(t + 0.15);
   } 
   else if (type === 'capture') {
-    // 駒を取る音
     osc.type = 'triangle'; 
     osc.frequency.setValueAtTime(200, t); 
     osc.frequency.exponentialRampToValueAtTime(50, t + 0.2);
     
-    // 0.9 -> 0.4 に変更
-    gain.gain.setValueAtTime(0.4, t); 
+    // キャプチャは少し強調するが、最大1.0を超えないように
+    let capVol = Math.min(vol * 1.3, 1.0);
+    gain.gain.setValueAtTime(capVol, t); 
     gain.gain.linearRampToValueAtTime(0.01, t + 0.2);
     
     osc.start(t); 
     osc.stop(t + 0.2);
   } 
   else if (type === 'start') {
-    // スタート音
     osc.type = 'sine';
     osc.frequency.setValueAtTime(440, t); 
     osc.frequency.linearRampToValueAtTime(880, t + 0.4);
     
-    // 0.5 -> 0.3 に変更
-    gain.gain.setValueAtTime(0.3, t); 
+    gain.gain.setValueAtTime(vol, t); 
     gain.gain.linearRampToValueAtTime(0, t + 0.6);
     
     osc.start(t); 
@@ -640,16 +615,12 @@ function playSound(type) {
 // === 紙吹雪演出 ===
 function shootConfetti() {
     var count = 200;
-    var defaults = {
-        origin: { y: 0.7 }
-    };
-
+    var defaults = { origin: { y: 0.7 } };
     function fire(particleRatio, opts) {
         confetti(Object.assign({}, defaults, opts, {
             particleCount: Math.floor(count * particleRatio)
         }));
     }
-
     fire(0.25, { spread: 26, startVelocity: 55, });
     fire(0.2, { spread: 60, });
     fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
@@ -750,7 +721,7 @@ function getBestMove(levelOverride) {
 
 // === ゲーム進行ロジック ===
 function startGame() {
-  initAudio(); // ユーザーのクリックイベント内で確実にAudioContextを再開
+  initAudio(); 
   playSound('start');
   playerColor = $('#color-select').val();
   aiLevel = parseInt($('#level').val());
@@ -788,7 +759,6 @@ function startGame() {
   ui.btnAuto.removeClass('btn-auto-active').text("🤖 オート: OFF");
   updateStatus(null);
   
-  // レイアウト調整を強制実行
   adjustLayout();
     
   if (playerColor === 'b') {
@@ -820,7 +790,6 @@ function makeAiMove() {
     const moveResult = game.move(m);
     board.position(game.fen());
     
-    // AIの移動時にも確実に音を再生
     playSound(moveResult.flags.includes('c') ? 'capture' : 'move');
       
     updateTurnMessage(moveResult); 
@@ -880,7 +849,6 @@ function onDrop(source, target) {
     return 'snapback'; 
   }
 
-  // プレイヤーの移動時に音を再生
   playSound(move.flags.includes('c') ? 'capture' : 'move');
     
   updateTurnMessage(move);
@@ -891,7 +859,7 @@ function onDrop(source, target) {
 
 function onSnapEnd() { board.position(game.fen()); }
 
-// === AIの形勢判断スコアを取得 (AI視点のスコア) ===
+// === AIの形勢判断スコアを取得 ===
 function getAiScore() {
     const rawScore = getBoardValue(game);
     return (playerColor === 'w') ? -rawScore : rawScore;
@@ -911,7 +879,7 @@ function updateTurnMessage(move) {
     const pieceName = pieceNamesMesu[move.piece] || '駒';
     const isPlayerSideMove = (move.color === playerColor);
       
-    // --- プレイヤー側（味方）が動かした時 ---
+    // --- プレイヤー側が動かした時 ---
     if (isPlayerSideMove) {
         if (game.in_check()) {
             if (state === "Winning") {
@@ -975,7 +943,7 @@ function updateTurnMessage(move) {
                 `調子に乗って${pieceName}を進化させちゃって…潰してやる！`
             ]));
         } else {
-            // 通常移動の解説
+            // 通常移動
             const phrases = {
                 'p': [`${pieceName}をちょこちょこ進めて…可愛いねぇｗ`, `${pieceName}進めて何になるの？`],
                 'n': [`${pieceName}がピョンピョン跳ねて…うざい。`, `${pieceName}の動き、読みづらいかも…。`],
@@ -1049,7 +1017,6 @@ function updateStatus(lastMove) {
   const aiScore = getAiScore();
   const aiState = getAiState(aiScore);
 
-  // 1. ゲージ更新
   const pct = (1 / (1 + Math.exp(-rawScore / 500))) * 100;
   ui.evalWhite.css('width', pct + '%');
     
@@ -1058,23 +1025,20 @@ function updateStatus(lastMove) {
   if (isMyTurn) ui.face.addClass('active-turn');
   else ui.face.removeClass('active-turn');
 
-  // A. ゲーム終了時
   if(game.game_over()) {
     ui.btnRetry.removeClass('hidden'); ui.btnAuto.hide(); ui.btnHint.hide(); ui.btnUndo.hide();
       
     if(game.in_checkmate()) {
         const playerLost = (game.turn() === playerColor);
         if (playerLost) {
-            // プレイヤーの負け
             ui.status.text("あなたの負け (ざぁこ♡)");
             ui.msg.html(getRandomMsg('win')); 
             ui.face.text(getRandom(EMOJI_WINNING));
         } else {
-            // プレイヤーの勝ち（紙吹雪発動！）
             ui.status.text("あなたの勝ち！(参りました)");
             ui.msg.html(getRandomMsg('lose')); 
             ui.face.text(getRandom(EMOJI_LOSING));
-            shootConfetti(); // ここで紙吹雪
+            shootConfetti(); 
         }
     } else {
         ui.status.text("引き分け");
@@ -1087,7 +1051,6 @@ function updateStatus(lastMove) {
   ui.status.text(isMyTurn ? "あなたの番" : "相手の番");
   if(board) board.draggable = (isMyTurn && !isAuto && !game.game_over());
 
-  // B. プレイヤー手番中
   if (isMyTurn) {
       if (game.in_check()) {
           ui.face.text(EMOJI_SCARED);
@@ -1099,30 +1062,15 @@ function updateStatus(lastMove) {
       return;
   }
 
-  // C. AIの手番
   ui.boardWrap.removeClass('in-check-danger');
-
-  if (aiState === "Losing") {
-      ui.face.text(getRandom(EMOJI_LOSING)); 
-      return;
-  }
-  if (aiState === "Winning") {
-      ui.face.text(getRandom(EMOJI_WINNING)); 
-      return;
-  }
+  if (aiState === "Losing") { ui.face.text(getRandom(EMOJI_LOSING)); return; }
+  if (aiState === "Winning") { ui.face.text(getRandom(EMOJI_WINNING)); return; }
 
   if (lastMove) {
       const isPlayerJustMoved = (lastMove.color === playerColor);
       if (isPlayerJustMoved) {
-          if (game.in_check()) {
-               ui.face.text("😵‍💫"); 
-               ui.boardWrap.addClass('in-check-danger');
-               return;
-          }
-          if (lastMove.flags.includes('c')) {
-               ui.face.text("😠"); 
-               return;
-          }
+          if (game.in_check()) { ui.face.text("😵‍💫"); ui.boardWrap.addClass('in-check-danger'); return; }
+          if (lastMove.flags.includes('c')) { ui.face.text("😠"); return; }
       }
   }
   ui.face.text(getRandom(EMOJI_NORMAL));
@@ -1144,14 +1092,9 @@ function toggleAutoPlay() {
     ui.btnUndo.prop('disabled', false).removeClass('btn-disabled');
     ui.btnAuto.removeClass('btn-auto-active').text("🤖 OFF");
     clearTimeout(autoTimer);
-    if (game.turn() === playerColor) {
-        ui.msg.text("やっと自分でやる気になった？");
-    } else {
-        ui.msg.text("私の番だけど？");
-    }
-    if(game.turn() !== playerColor) {
-       gameLoop(); 
-    }
+    if (game.turn() === playerColor) ui.msg.text("やっと自分でやる気になった？");
+    else ui.msg.text("私の番だけど？");
+    if(game.turn() !== playerColor) gameLoop(); 
     updateStatus(null);
   }
 }
