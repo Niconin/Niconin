@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>究極チェス - CROSS & STANDARD</title>
+    <style>
+        :root { --gold: #d4af37; --dark-bg: #121212; --panel-bg: #1e272e; }
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: var(--dark-bg); color: #ecf0f1; margin: 0; padding: 10px; user-select: none; transition: background 1s ease; }
+        .header { text-align: center; margin-bottom: 15px; }
+        h1 { font-size: 32px; margin: 0; color: var(--gold); text-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+        
+        #board-wrapper { position: relative; padding: 8px; background: #2c3e50; border: 4px solid var(--gold); border-radius: 8px; transition: transform 0.5s ease; }
+        #board { display: grid; gap: 0; background: #34495e; }
+        
+        .square { width: 42px; height: 42px; display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: pointer; position: relative; touch-action: none; }
+        .sq-white { background-color: #f0d9b5; }
+        .sq-black { background-color: #b58863; }
+        .hidden { visibility: hidden; pointer-events: none; }
+
+        .p-white { color: #fff; text-shadow: 1px 1px 2px #000; }
+        .p-red { color: #ff4757; text-shadow: 1px 1px 2px #000; }
+        .p-black { color: #111; text-shadow: 0px 0px 2px #fff; }
+        .p-blue { color: #1e90ff; text-shadow: 1px 1px 2px #000; }
+
+        .selected { background-color: rgba(241, 196, 15, 0.7) !important; }
+        .valid-move::after { content: ""; width: 10px; height: 10px; background: rgba(46, 204, 113, 0.6); border-radius: 50%; position: absolute; }
+        .valid-capture { background-color: rgba(231, 76, 60, 0.5) !important; }
+
+        #home-screen { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: var(--panel-bg); padding: 25px; border-radius: 15px; width: 340px; }
+        #game-ui { display: none; text-align: center; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; width: 100%; }
+        button { padding: 12px; font-weight: bold; cursor: pointer; border-radius: 8px; border: none; color: white; background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .btn-blue { background: #2980b9; }
+        .btn-purple { background: #8e44ad; }
+        .btn-home { background: #7f8c8d; grid-column: span 2; }
+        h3 { grid-column: span 2; margin: 0 0 5px 0; font-size: 14px; color: var(--gold); }
+
+        /* 勝利演出用CSS */
+        .win-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 1000; background: rgba(0,0,0,0.8); animation: fadeIn 0.8s forwards;
+        }
+        .win-text { font-size: 60px; font-weight: bold; text-shadow: 0 0 20px #fff; margin-bottom: 20px; transform: scale(0); animation: popIn 0.5s 0.5s forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes popIn { to { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+    <div class="header"><h1>究極チェス</h1></div>
+
+    <div id="home-screen">
+        <h3>二人対戦 (8x8)</h3>
+        <button class="btn-blue" onclick="startGame('pvp_2p')">対人戦</button>
+        <button class="btn-blue" onclick="startGame('cpu_2p')">CPU戦</button>
+        
+        <h3 style="margin-top:10px;">四人対戦 (十字)</h3>
+        <button class="btn-purple" onclick="startGame('4p')">対人戦</button>
+        <button class="btn-purple" onclick="startGame('cpu_4p')">CPU戦</button>
+    </div>
+
+    <div id="game-ui">
+        <div id="status" style="margin-bottom:10px; font-weight:bold; font-size:18px;">白の番です</div>
+        <div id="board-wrapper"><div id="board"></div></div>
+        <div class="controls">
+            <button onclick="undoMove()" style="background:#34495e;">待った</button>
+            <button onclick="location.reload()" class="btn-home">ホームに戻る</button>
+        </div>
+    </div>
+
+    <script>
+        const PIECES = { R:'♜', N:'♞', B:'♝', Q:'♛', K:'♚', P:'♟' };
+        let boardState = {}, turn = 0, selectedKey = null, validMoves = [], mode = '', history = [];
+        const COLS_4P = ['white', 'red', 'black', 'blue'], COLS_2P = ['white', 'black'];
+
+        function startGame(m) {
+            mode = m; turn = 0; selectedKey = null; history = [];
+            document.body.style.background = 'var(--dark-bg)';
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('game-ui').style.display = 'block';
+            
+            const isCross = mode.includes('4p');
+            const size = isCross ? 11 : 8;
+            const container = document.getElementById('board');
+            container.style.gridTemplateColumns = `repeat(${size}, 42px)`;
+            container.innerHTML = '';
+            boardState = {};
+
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    const sq = document.createElement('div');
+                    sq.className = 'square';
+                    if (isCross) {
+                        const inV = (c >= 3 && c <= 7), inH = (r >= 3 && r <= 7);
+                        if (!inV && !inH) sq.classList.add('hidden');
+                    }
+                    sq.classList.add((r + c) % 2 === 0 ? 'sq-white' : 'sq-black');
+                    sq.dataset.r = r; sq.dataset.c = c;
+                    
+                    sq.onmousedown = (e) => handleStart(r, c);
+                    sq.onmouseup = (e) => handleEnd(r, c);
+                    sq.ontouchstart = (e) => { e.preventDefault(); handleStart(r, c); };
+                    sq.ontouchend = (e) => {
+                        const touch = e.changedTouches[0];
+                        const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                        if (target && target.dataset.r !== undefined) {
+                            handleEnd(parseInt(target.dataset.r), parseInt(target.dataset.c));
+                        } else { handleEnd(-1, -1); }
+                    };
+
+                    container.appendChild(sq);
+                }
+            }
+            setupPieces(size);
+            render();
+        }
+
+        function handleStart(r, c) {
+            const key = `${r}-${c}`, activeCols = mode.includes('4p') ? COLS_4P : COLS_2P;
+            const currentTurnColor = activeCols[turn % activeCols.length];
+            const p = boardState[key];
+            if (p && p.color === currentTurnColor) {
+                selectedKey = key;
+                validMoves = getPossibleMoves(r, c);
+                render();
+            }
+        }
+
+        function handleEnd(r, c) {
+            if (selectedKey) {
+                const key = `${r}-${c}`;
+                if (validMoves.some(m => m[0] === r && m[1] === c)) {
+                    executeMove(selectedKey, key);
+                } else {
+                    selectedKey = null; validMoves = []; render();
+                }
+            }
+        }
+
+        function setupPieces(size) {
+            const back8 = ['R','N','B','Q','K','B','N','R'];
+            const backCross = ['R','N','K','Q','B']; 
+            if (mode.includes('2p')) {
+                for(let i=0; i<8; i++) {
+                    boardState[`0-${i}`] = { type:back8[i], color:'black', moved:false };
+                    boardState[`1-${i}`] = { type:'P', color:'black', moved:false };
+                    boardState[`6-${i}`] = { type:'P', color:'white', moved:false };
+                    boardState[`7-${i}`] = { type:back8[i], color:'white', moved:false };
+                }
+            } else {
+                const confs = [
+                    {c:'white',r:10,p:9,dr:-1,dc:0}, {c:'black',r:0,p:1,dr:1,dc:0},
+                    {c:'red',r:3,p:1,dr:0,dc:1,isH:true}, {c:'blue',r:7,p:9,dr:0,dc:-1,isH:true}
+                ];
+                confs.forEach(s => {
+                    for(let i=0; i<5; i++){
+                        let r, c, pr, pc;
+                        if(!s.isH){ r=s.r; c=i+3; pr=s.p; pc=i+3; }
+                        else { r=i+3; c=(s.c==='red'?0:10); pr=i+3; pc=(s.c==='red'?1:9); }
+                        boardState[`${r}-${c}`] = { type:backCross[i], color:s.c, moved:false };
+                        boardState[`${pr}-${pc}`] = { type:'P', color:s.c, moved:false };
+                    }
+                });
+            }
+        }
+
+        function getPossibleMoves(r, c) {
+            const p = boardState[`${r}-${c}`]; if(!p) return [];
+            const moves = [];
+            const dirs = { white:[-1,0], black:[1,0], red:[0,1], blue:[0,-1] };
+            const d = dirs[p.color];
+            if(p.type === 'P'){
+                let nr = r+d[0], nc = c+d[1];
+                if(!boardState[`${nr}-${nc}`]) {
+                    moves.push([nr, nc]);
+                    if(!p.moved && !boardState[`${r+d[0]*2}-${c+d[1]*2}`]) moves.push([r+d[0]*2, c+d[1]*2]);
+                }
+                const atts = (p.color==='white'||p.color==='black') ? [[d[0],1],[d[0],-1]] : [[1,d[1]],[-1,d[1]]];
+                atts.forEach(a => {
+                    let ar = r+a[0], ac = c+a[1];
+                    if(boardState[`${ar}-${ac}`] && boardState[`${ar}-${ac}`].color !== p.color) moves.push([ar, ac]);
+                });
+            } else if(p.type === 'N'){
+                [[-2,-1],[-2,1],[2,-1],[2,1],[-1,-2],[1,-2],[-1,2],[1,2]].forEach(m => moves.push([r+m[0], c+m[1]]));
+            } else {
+                const steps = (p.type==='R') ? [[0,1],[0,-1],[1,0],[-1,0]] : 
+                             (p.type==='B') ? [[1,1],[1,-1],[-1,1],[-1,-1]] : 
+                             [[0,1],[0,-1],[1,0],[-1,0],[1,1],[1,-1],[-1,1],[-1,-1]];
+                steps.forEach(s => {
+                    for(let i=1; i<12; i++){
+                        let nr = r+s[0]*i, nc = c+s[1]*i;
+                        if(boardState[`${nr}-${nc}`]) {
+                            if(boardState[`${nr}-${nc}`].color !== p.color) moves.push([nr, nc]);
+                            break;
+                        }
+                        moves.push([nr, nc]); if(p.type === 'K') break;
+                    }
+                });
+            }
+            return moves.filter(m => {
+                const sq = document.querySelector(`[data-r="${m[0]}"][data-c="${m[1]}"]`);
+                return sq && !sq.classList.contains('hidden') && (!boardState[`${m[0]}-${m[1]}`] || boardState[`${m[0]}-${m[1]}`].color !== p.color);
+            });
+        }
+
+        function executeMove(from, to) {
+            history.push(JSON.stringify(boardState));
+            const captured = boardState[to];
+            boardState[to] = boardState[from];
+            boardState[to].moved = true;
+            delete boardState[from];
+
+            if (captured && captured.type === 'K') {
+                const deadColor = captured.color;
+                if (mode.includes('4p')) {
+                    Object.keys(boardState).forEach(k => {
+                        if (boardState[k].color === deadColor) delete boardState[k];
+                    });
+                }
+            }
+
+            const kingsLeft = new Set();
+            Object.values(boardState).forEach(p => { if(p.type === 'K') kingsLeft.add(p.color); });
+            
+            if (kingsLeft.size === 1) {
+                render();
+                showWinner(Array.from(kingsLeft)[0]);
+                return;
+            }
+
+            nextTurn();
+            render();
+            checkCPUTurn();
+        }
+
+        // --- 勝利演出関数 ---
+        function showWinner(color) {
+            const names = { white:'白', red:'赤', black:'黒', blue:'青' };
+            const hex = { white:'#ffffff', red:'#ff4757', black:'#111111', blue:'#1e90ff' };
+            
+            // 背景色を変更
+            document.body.style.background = hex[color];
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'win-overlay';
+            overlay.innerHTML = `
+                <div class="win-text" style="color:${hex[color]}">${names[color].toUpperCase()} WINNER</div>
+                <button onclick="location.reload()" style="background:#fff; color:#000; padding:15px 30px; font-size:20px;">ホームに戻る</button>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        function nextTurn() {
+            const activeCols = mode.includes('4p') ? COLS_4P : COLS_2P;
+            turn++;
+            let nextColor = activeCols[turn % activeCols.length];
+            let hasKing = Object.values(boardState).some(p => p.type === 'K' && p.color === nextColor);
+            if (!hasKing) nextTurn();
+        }
+
+        function checkCPUTurn() {
+            const activeCols = mode.includes('4p') ? COLS_4P : COLS_2P;
+            const currentTurnColor = activeCols[turn % activeCols.length];
+            const isCPU = (mode === 'cpu_2p' && currentTurnColor === 'black') || 
+                          (mode === 'cpu_4p' && currentTurnColor !== 'white');
+            if (isCPU) setTimeout(makeCPUMove, 600);
+        }
+
+        function makeCPUMove() {
+            const activeCols = mode.includes('4p') ? COLS_4P : COLS_2P;
+            const currentTurnColor = activeCols[turn % activeCols.length];
+            const moves = [];
+            Object.keys(boardState).forEach(k => {
+                if(boardState[k].color === currentTurnColor) {
+                    const [r, c] = k.split('-').map(Number);
+                    getPossibleMoves(r, c).forEach(m => moves.push({from:k, to:`${m[0]}-${m[1]}`}));
+                }
+            });
+            if(moves.length > 0) {
+                const move = moves[Math.floor(Math.random() * moves.length)];
+                executeMove(move.from, move.to);
+            }
+        }
+
+        function render() {
+            document.querySelectorAll('.square').forEach(sq => {
+                const r = sq.dataset.r, c = sq.dataset.c, p = boardState[`${r}-${c}`];
+                sq.innerText = p ? PIECES[p.type] : '';
+                sq.className = sq.className.split(' ').filter(c => !c.startsWith('p-') && !['selected','valid-move','valid-capture'].includes(c)).join(' ');
+                if(p) sq.classList.add(`p-${p.color}`);
+                if(selectedKey === `${r}-${c}`) sq.classList.add('selected');
+                const isMove = validMoves.some(m => m[0] == r && m[1] == c);
+                if(isMove) sq.classList.add(p ? 'valid-capture' : 'valid-move');
+            });
+            const activeCols = mode.includes('4p') ? COLS_4P : COLS_2P;
+            const names = { white:'白', red:'赤', black:'黒', blue:'青' };
+            document.getElementById('status').innerText = names[activeCols[turn % activeCols.length]] + ' の番です';
+        }
+
+        function undoMove() { if(history.length > 0) { boardState = JSON.parse(history.pop()); turn--; selectedKey = null; validMoves = []; render(); } }
+    </script>
+</body>
+</html>
