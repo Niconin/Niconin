@@ -1,13 +1,23 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>にこにんさんちのメイドラゴン</title>
+  <style>
+    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+    .frame-wrap { display: flex; flex-direction: column; height: 100vh; }
+    .frame-nav { height: 25%; width: 100%; border: none; }
+    .frame-main { flex: 1; width: 100%; border: none; }
+  </style>
 </head>
-<frameset noresize rows="25%, *">
-  <frame src="left.html">
-    <frame src="coolr.html">
-</frameset>
+
+<body>
+  <div class="frame-wrap">
+    <iframe src="left.html" class="frame-nav" title="ナビゲーション"></iframe>
+    <iframe src="coolr.html" class="frame-main" title="コンテンツ"></iframe>
+  </div>
+</body>
 
 </html>
