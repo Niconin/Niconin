@@ -6,27 +6,49 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>左</title>
   <style>
-    h1 {
-      font-size: clamp(1rem, 4vw, 2rem);
+    body {
+      margin: 0;
+      padding: 4px;
+      box-sizing: border-box;
+      text-align: center;
     }
-    nav { text-align: center; }
-    table { margin: 0 auto; }
+
+    h1 {
+      font-size: clamp(0.65rem, 2.5vw, 1.5rem);
+      margin: 0.2em 0;
+      overflow-wrap: break-word;
+    }
+
+    nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    nav ul li a {
+      display: block;
+      font-size: clamp(0.75rem, 2vw, 1rem);
+      padding: 2px 4px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <nav>
   <h1>にこにんの2次元アーカイブス</h1>
-  <table>
-    <tr>
-      <td><a href="okk.html" target="_top">続刊</a></td>
-      <td><a href="rdata.html" target="_top">ロリ</a></td>
-      <td><a href="oshi.html" target="_top">推し</a></td>
-      <td><a href="index.html" target="_top">TOP</a></td>
-      <td><a href="kami.html" target="_top">神</a></td>
-      <td><a href="hmt.html" target="_top">ハマった</a></td>
-      <td><a href="x.html" target="_top">コラム</a></td>
-    </tr>
-  </table>
+  <nav>
+    <ul>
+      <li><a href="okk.html" target="_top">続刊</a></li>
+      <li><a href="rdata.html" target="_top">ロリ</a></li>
+      <li><a href="oshi.html" target="_top">推し</a></li>
+      <li><a href="index.html" target="_top">TOP</a></li>
+      <li><a href="kami.html" target="_top">神</a></li>
+      <li><a href="hmt.html" target="_top">ハマった</a></li>
+      <li><a href="x.html" target="_top">コラム</a></li>
+    </ul>
   </nav>
 </body>
 

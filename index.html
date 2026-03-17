@@ -27,13 +27,15 @@
     }
 
     #main-container {
-      width: 500px;
-      min-height: 500px;
-      max-width: 100%;
+      width: min(500px, 100%);
+      aspect-ratio: 1;
       background-image: url('新2conin.png');
-      background-repeat: repeat;
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
       margin: 2em auto;
-      padding: 70px 8px 8px;
+      padding-top: 96px;
+      padding-inline: 8px;
+      padding-bottom: 8px;
       box-sizing: border-box;
     }
 
