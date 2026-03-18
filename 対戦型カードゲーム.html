@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Survival Duel - Recovery Max 2 Edition</title>
+    <style>
+        :root { --atk-c: #ff5e57; --def-c: #1e90ff; --item-c: #2ed573; --bg: #1e272e; }
+        body { background: var(--bg); color: white; font-family: 'Meiryo', sans-serif; display: flex; justify-content: center; height: 100vh; margin: 0; overflow: hidden; user-select: none; }
+        #game-container { width: 1000px; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; box-sizing: border-box; }
+        .side { display: flex; flex-direction: column; align-items: center; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 15px; position: relative; }
+        .hp-bg, .mp-bg { width: 350px; height: 12px; background: #485460; border-radius: 10px; overflow: hidden; margin: 5px 0; border: 1px solid #000; }
+        .hp-fill { width: 100%; height: 100%; background: #ff3f34; transition: 0.4s; }
+        .mp-fill { width: 100%; height: 100%; background: #f1c40f; transition: 0.4s; }
+        .shield-val { font-weight: bold; color: #00d8ff; margin: 5px; font-size: 1.1rem; border: 1px solid #00d8ff; padding: 2px 10px; border-radius: 5px; }
+        .hand { display: flex; gap: 8px; height: 130px; margin: 10px 0; min-width: 800px; justify-content: center; }
+        .card {
+            width: 85px; height: 120px; background: #fff; color: #333; border-radius: 8px;
+            display: flex; flex-direction: column; align-items: center; justify-content: space-around;
+            padding: 8px; border: 3px solid #d2dae2; box-sizing: border-box; transition: 0.2s; font-size: 0.85rem;
+        }
+        .card.atk, .card.item { cursor: pointer; }
+        .card.atk:hover:not(.disabled), .card.item:hover:not(.disabled) { transform: translateY(-10px); border-color: #f1c40f; }
+        .card.atk { background: var(--atk-c); color: white; }
+        .card.def { background: var(--def-c); color: white; cursor: default; opacity: 0.7; } 
+        .card.item { background: var(--item-c); color: white; }
+        .card.disabled { opacity: 0.3 !important; cursor: not-allowed !important; filter: grayscale(1); }
+        .card.selected { border-color: #f1c40f; box-shadow: 0 0 15px #f1c40f; transform: translateY(-8px); }
+        #mid-section { text-align: center; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; }
+        #battle-log { height: 60px; overflow-y: auto; font-size: 14px; color: #0be881; text-align: left; padding: 5px; }
+        #turn-info { font-size: 24px; font-weight: bold; color: #ffa801; margin-bottom: 5px; }
+        #result-display { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.95); padding: 40px 60px; border-radius: 20px; font-size: 36px; font-weight: bold; display: none; z-index: 100; border: 3px solid #fff; text-align: center; line-height: 1.5; }
+        button { background: #ffa801; border: none; padding: 12px 50px; border-radius: 30px; font-weight: bold; cursor: pointer; font-size: 1.2rem; }
+        button:disabled { background: #485460; cursor: not-allowed; }
+        #cpu-status-tag { color: #ff5e57; font-weight: bold; font-size: 12px; margin-top: 5px; min-height: 1.2em; }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="result-display"></div>
+        <div class="side enemy">
+            <div class="status">
+                <h2 id="enemy-title" style="cursor:help;">ENEMY CPU</h2>
+                <div class="hp-bg"><div id="enemy-hp-bar" class="hp-fill"></div></div>
+                <div class="mp-bg"><div id="enemy-mp-bar" class="mp-fill"></div></div>
+                <div class="stats">HP: <span id="enemy-hp">40</span>/40 | MP: <span id="enemy-mp">40</span>/60</div>
+                <div id="enemy-def-shield" class="shield-val">🛡️ 防御待機中</div>
+                <div id="cpu-status-tag"></div>
+            </div>
+            <div id="enemy-hand" class="hand"></div>
+        </div>
+        <div id="mid-section">
+            <div id="turn-info">YOUR TURN</div>
+            <div id="battle-log"></div>
+            <div id="idle-info" style="font-size: 11px; color: #aaa;">膠着: <span id="idle-count">0</span>/5 | CPU連続回復: <span id="cpu-rec-count">0</span>/4</div>
+        </div>
+        <div class="side player">
+            <div id="player-hand" class="hand"></div>
+            <div class="status">
+                <div id="player-def-shield" class="shield-val">🛡️ 防御待機中</div>
+                <div class="hp-bg"><div id="player-hp-bar" class="hp-fill"></div></div>
+                <div class="mp-bg"><div id="player-mp-bar" class="mp-fill"></div></div>
+                <div class="stats">HP: <span id="player-hp">40</span>/40 | MP: <span id="player-mp">40</span>/60</div>
+                <h2>PLAYER (YOU)</h2>
+                <button id="end-turn-btn">行動確定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const config = { initialHP: 40, maxHP: 40, initialMP: 40, maxMP: 60, handLimit: 8, atkLimit: 3 };
+        let p = { hp: 40, mp: 40, hand: [] };
+        let e = { hp: 40, mp: 40, hand: [] };
+        let isPlayerTurn = true;
+        let selectedIndices = [];
+        let idleTurns = 0;
+        let hasResetHand = false;
+        let enemyClickCount = 0;
+        let isPeeking = false;
+        let cpuConsecutiveRecovery = 0;
+        let cpuRestrictionTurns = 0;
+
+        function createCard(currentHand, forceType = null) {
+            if(forceType === 'MP_REC') return { type: 'item', val: Math.floor(Math.random() * 10) + 6, cost: 0, label: "MP回復" };
+            if(forceType === 'FORCE_ATK') {
+                const v = Math.floor(Math.random() * 10) + 1;
+                return { type: 'atk', val: v, cost: Math.floor(v * 1.5), label: "攻撃" };
+            }
+
+            // 同名カードの所持数をカウント
+            const hpRecCount = currentHand.filter(c => c.label === "HP回復").length;
+            const mpRecCount = currentHand.filter(c => c.label === "MP回復").length;
+
+            const r = Math.random();
+            if (r < 0.50) { 
+                const v = Math.floor(Math.random() * 10) + 1;
+                return { type: 'atk', val: v, cost: Math.floor(v * 1.5), label: "攻撃" };
+            } else if (r < 0.65) { 
+                const v = Math.floor(Math.random() * 10) + 1;
+                return { type: 'def', val: v, cost: 0, label: "防御" };
+            } else { 
+                const isHP = Math.random() < 0.3;
+                if(isHP) {
+                    // HP回復がすでに2枚あるなら攻撃に変換
+                    if(hpRecCount >= 2) return createCard(currentHand, 'FORCE_ATK');
+                    const v = Math.floor(Math.random() * 6) + 5;
+                    return { type: 'item', val: v, cost: Math.floor(v * 0.8), label: "HP回復" };
+                } else {
+                    // MP回復がすでに2枚あるなら攻撃に変換
+                    if(mpRecCount >= 2) return createCard(currentHand, 'FORCE_ATK');
+                    const v = Math.floor(Math.random() * 10) + 6;
+                    return { type: 'item', val: v, cost: 0, label: "MP回復" };
+                }
+            }
+        }
+
+        document.getElementById('enemy-title').onclick = () => {
+            enemyClickCount++;
+            if(enemyClickCount >= 10 && !isPeeking) {
+                isPeeking = true; enemyClickCount = 0;
+                addLog("!! 敵の手札を看破した (10秒間) !!");
+                updateUI();
+                setTimeout(() => { isPeeking = false; updateUI(); }, 10000);
+            }
+        };
+
+        function init() {
+            for(let i=0; i<config.handLimit; i++) { draw('player'); draw('enemy'); }
+            updateUI();
+        }
+
+        function draw(side, forceMP = false) {
+            const user = side === 'player' ? p : e;
+            if(forceMP && user.hand.length < config.handLimit) {
+                user.hand.push(createCard(user.hand, 'MP_REC'));
+                addLog((side === 'player' ? 'あなた' : '敵') + "の膠着救済MPドロー");
+                return;
+            }
+            while(user.hand.length < config.handLimit) {
+                user.hand.push(createCard(user.hand));
+            }
+        }
+
+        function resetAllHands() {
+            p.hand = []; e.hand = [];
+            for(let i=0; i<config.handLimit; i++) { draw('player'); draw('enemy'); }
+            addLog("!! 膠着状態により手札がリセットされました !!");
+            showFinalResult(0, 0, "手札リセット！");
+        }
+
+        function updateUI() {
+            document.getElementById('player-hp').innerText = p.hp;
+            document.getElementById('player-mp').innerText = p.mp;
+            document.getElementById('player-hp-bar').style.width = `${(p.hp/config.maxHP)*100}%`;
+            document.getElementById('player-mp-bar').style.width = `${(p.mp/config.maxMP)*100}%`;
+            document.getElementById('enemy-hp').innerText = e.hp;
+            document.getElementById('enemy-mp').innerText = e.mp;
+            document.getElementById('enemy-hp-bar').style.width = `${(e.hp/config.maxHP)*100}%`;
+            document.getElementById('enemy-mp-bar').style.width = `${(e.mp/config.maxMP)*100}%`;
+            document.getElementById('idle-count').innerText = idleTurns;
+            document.getElementById('cpu-rec-count').innerText = cpuConsecutiveRecovery;
+
+            const tag = document.getElementById('cpu-status-tag');
+            if (cpuRestrictionTurns > 0) tag.innerText = `⚠️ 回復制限中 (あと${cpuRestrictionTurns}T)`;
+            else if (cpuConsecutiveRecovery >= 3) tag.innerText = `🔥 回復過多警報`;
+            else tag.innerText = "";
+
+            const selectedCards = selectedIndices.map(idx => p.hand[idx]);
+            const hasItemSelected = selectedCards.some(c => c.type === 'item');
+            const atkCount = selectedCards.filter(c => c.type === 'atk').length;
+
+            const pHandEl = document.getElementById('player-hand');
+            pHandEl.innerHTML = '';
+            p.hand.forEach((card, i) => {
+                const div = document.createElement('div');
+                const isSelected = selectedIndices.includes(i);
+                let totalCost = 0;
+                selectedIndices.forEach(idx => totalCost += p.hand[idx].cost);
+                const canAfford = (p.mp - (isSelected ? 0 : totalCost)) >= card.cost;
+                let statusFull = (card.label === "HP回復" && p.hp >= config.maxHP) || (card.label === "MP回復" && p.mp >= config.maxMP);
+
+                let logicDisabled = false;
+                if (card.type === 'def') logicDisabled = true;
+                if (hasItemSelected && card.type === 'atk') logicDisabled = true;
+                if (atkCount > 0 && card.type === 'item') logicDisabled = true;
+                if (hasItemSelected && card.type === 'item' && !isSelected) logicDisabled = true;
+                if (statusFull || (isSelected ? false : (card.type === 'atk' && atkCount >= config.atkLimit))) logicDisabled = true;
+
+                div.className = `card ${card.type} ${!isPlayerTurn || logicDisabled || !canAfford ? 'disabled' : ''} ${isSelected ? 'selected' : ''}`;
+                div.innerHTML = `<b>${card.label}</b><br>${card.type === 'def' ? '防御値' : '値'}: ${card.val}<br><small>${card.cost > 0 ? 'MP:'+card.cost : 'なし'}</small>`;
+                if(isPlayerTurn && !logicDisabled && (canAfford || isSelected)) {
+                    div.onclick = () => {
+                        if(isSelected) selectedIndices = selectedIndices.filter(id => id !== i);
+                        else selectedIndices.push(i);
+                        updateUI();
+                    };
+                }
+                pHandEl.appendChild(div);
+            });
+
+            const eHandEl = document.getElementById('enemy-hand');
+            eHandEl.innerHTML = '';
+            e.hand.forEach((card) => {
+                const div = document.createElement('div');
+                if(isPeeking) {
+                    div.className = `card ${card.type}`;
+                    div.innerHTML = `<b>${card.label}</b><br>値: ${card.val}`;
+                } else {
+                    div.className = `card`; div.innerText = "???";
+                }
+                eHandEl.appendChild(div);
+            });
+        }
+
+        document.getElementById('end-turn-btn').onclick = () => {
+            if(!isPlayerTurn) return;
+            executeAction('player');
+        };
+
+        function executeAction(side) {
+            const attacker = side === 'player' ? p : e;
+            const defender = side === 'player' ? e : p;
+            let totalDmgDone = 0;
+            let totalBlockedAmt = 0;
+            let recoveryText = "";
+            let actionTaken = false;
+            let isRecoveryAction = false;
+
+            let cardsToUse = [];
+            if (side === 'player') {
+                selectedIndices.sort((a, b) => b - a).forEach(idx => {
+                    const c = attacker.hand[idx];
+                    if (c.type === 'item') isRecoveryAction = true;
+                    cardsToUse.push(c);
+                    attacker.hand.splice(idx, 1);
+                    actionTaken = true;
+                });
+                selectedIndices = [];
+            } else {
+                const canUseRecovery = cpuRestrictionTurns === 0;
+                const items = attacker.hand.filter(c => {
+                    if (c.type !== 'item' || attacker.mp < c.cost || !canUseRecovery) return false;
+                    if (c.label === "HP回復" && attacker.hp >= config.maxHP) return false;
+                    if (c.label === "MP回復" && attacker.mp >= config.maxMP) return false;
+                    return true;
+                });
+
+                if (items.length > 0 && (attacker.hp < 25 || attacker.mp < 20)) {
+                    const item = items[0];
+                    cardsToUse.push(item);
+                    attacker.hand.splice(attacker.hand.indexOf(item), 1);
+                    actionTaken = true;
+                    isRecoveryAction = true;
+                } else {
+                    let tempMP = attacker.mp;
+                    let cpuAtkCount = 0;
+                    for (let i = attacker.hand.length - 1; i >= 0; i--) {
+                        let c = attacker.hand[i];
+                        if (c.type === 'atk' && tempMP >= c.cost && cpuAtkCount < config.atkLimit) {
+                            tempMP -= c.cost;
+                            cardsToUse.push(c);
+                            attacker.hand.splice(i, 1);
+                            cpuAtkCount++;
+                            actionTaken = true;
+                        }
+                    }
+                }
+
+                if (isRecoveryAction) {
+                    cpuConsecutiveRecovery++;
+                    if (cpuConsecutiveRecovery >= 4) { cpuRestrictionTurns = 4; cpuConsecutiveRecovery = 0; }
+                } else if (actionTaken && cpuRestrictionTurns === 0) {
+                    cpuConsecutiveRecovery = 0;
+                }
+                if (cpuRestrictionTurns > 0 && !isRecoveryAction) cpuRestrictionTurns--;
+            }
+
+            if (side === 'player') {
+                if (!actionTaken) idleTurns++; else idleTurns = 0;
+                if (idleTurns >= 5 && !hasResetHand) { resetAllHands(); hasResetHand = true; }
+                else if (idleTurns >= 7) { draw('player', true); draw('enemy', true); idleTurns = 0; }
+            }
+
+            cardsToUse.forEach(card => {
+                attacker.mp -= card.cost;
+                if (card.type === 'atk') {
+                    const res = processAttack(card.val, defender, side === 'player' ? 'enemy' : 'player');
+                    totalDmgDone += res.dmg; totalBlockedAmt += res.blocked;
+                } else if (card.type === 'item') {
+                    if (card.label === "HP回復") {
+                        attacker.hp = Math.min(config.maxHP, attacker.hp + card.val);
+                        recoveryText = side === 'player' ? "HPを回復しました" : "敵はHPを回復しました";
+                    } else {
+                        attacker.mp = Math.min(config.maxMP, attacker.mp + card.val);
+                        recoveryText = side === 'player' ? "MPを回復しました" : "敵はMPを回復しました";
+                    }
+                }
+            });
+
+            draw(side);
+            showFinalResult(totalDmgDone, totalBlockedAmt, recoveryText);
+            updateUI();
+            if(checkEnd()) return;
+
+            const waitTime = 5500;
+            if (side === 'player') {
+                isPlayerTurn = false;
+                document.getElementById('turn-info').innerText = "ENEMY TURN";
+                document.getElementById('end-turn-btn').disabled = true;
+                setTimeout(() => executeAction('enemy'), waitTime);
+            } else {
+                setTimeout(() => {
+                    isPlayerTurn = true;
+                    document.getElementById('turn-info').innerText = "YOUR TURN";
+                    document.getElementById('end-turn-btn').disabled = false;
+                    updateUI();
+                }, waitTime - 500);
+            }
+        }
+
+        function processAttack(dmg, defender, targetSide) {
+            let currentBlocked = 0; let currentDmg = dmg;
+            for(let i = defender.hand.length - 1; i >= 0; i--) {
+                if(defender.hand[i].type === 'def' && currentDmg > 0) {
+                    const shield = defender.hand[i].val;
+                    const blocked = Math.min(currentDmg, shield);
+                    currentBlocked += blocked; currentDmg -= blocked;
+                    defender.hand.splice(i, 1); draw(targetSide);
+                }
+            }
+            defender.hp = Math.max(0, defender.hp - currentDmg);
+            return { dmg: currentDmg, blocked: currentBlocked };
+        }
+
+        function showFinalResult(dmg, blocked, recText) {
+            const resEl = document.getElementById('result-display');
+            let html = "";
+            if (recText) {
+                html = `<span style="color:var(--item-c)">${recText}</span>`;
+                if(recText !== "手札リセット！") addLog(recText);
+            } else if (dmg > 0 || blocked > 0) {
+                html = `合計ダメージ: <span style="color:var(--atk-c)">${dmg}</span><br>防御数値: <span style="color:var(--def-c)">${blocked}</span>`;
+                addLog(`総攻撃:${dmg} (防御:${blocked})`);
+            } else {
+                html = "行動なし";
+            }
+            resEl.innerHTML = html;
+            resEl.style.display = 'block';
+            setTimeout(() => { resEl.style.display = 'none'; }, 5000);
+        }
+
+        function addLog(m) {
+            const b = document.getElementById('battle-log');
+            b.innerHTML = `<div>> ${m}</div>` + b.innerHTML;
+        }
+
+        function checkEnd() {
+            if(p.hp <= 0 || e.hp <= 0) {
+                const msg = p.hp <= 0 ? "GAME OVER..." : "VICTORY!!";
+                setTimeout(() => { alert(msg); location.reload(); }, 1000);
+                return true;
+            }
+            return false;
+        }
+        init();
+    </script>
+</body>
+</html>
