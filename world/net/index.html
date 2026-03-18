@@ -28,6 +28,12 @@
       @keyframes marquee { from { transform: translateX(100%); } to { transform: translateX(-200%); } }
       /* 動くテキストのフォントサイズをh1相当に調整 */
       .marquee-text span { font-size: 2em !important; }
+      /* 検索フォームの統一スタイル */
+      .search-section { margin: 8px 0; }
+      .search-section img.search-logo { display: block; margin: 4px auto; height: 30px; width: auto; }
+      .search-section form { margin: 4px 0; }
+      .search-section .search-row { display: flex; justify-content: center; gap: 4px; flex-wrap: wrap; }
+      .search-input { width: 100%; max-width: 400px; box-sizing: border-box; }
     </style>
 </head>
 
@@ -43,43 +49,50 @@
         <h1>教会でのルール</h1>
         <img src="mma_l.gif">
         <span style="font-size: 1.13em; color: #004000; font-family: ＭＳ Ｐゴシック">信者は、Microsoft Bing を信仰しなさい。</span>
-        <form method="get" action="https://www.bing.com/"><table><tbody>
-            <input type="hidden" name="ie" value="net教会">
-            <tr>
-                <td>
-                    <a href="https://www.bing.com/">
-                        <img src="bing.png" alt="bing">
-                    </a>
-                </td>
-                <td>
-                    <input type="text" name="q" size="70">
+        <!-- Bing 検索フォーム -->
+        <div class="search-section">
+            <a href="https://www.bing.com/">
+                <img src="bing.png" alt="bing" class="search-logo">
+            </a>
+            <form method="get" action="https://www.bing.com/">
+                <input type="hidden" name="ie" value="net教会">
+                <div class="search-row">
+                    <input type="text" name="q" class="search-input" placeholder="Bingで検索">
                     <input type="submit" value="検索">
-                </td>
-            </tr>
-        </tbody></table></form>
+                </div>
+            </form>
+        </div>
         <img src="mma_g.gif">
         <span style="font-size: 1.13em; color: #004000; font-family: ＭＳ Ｐゴシック">信者は、Google を信仰しなさい。</span>
-        <form method="get" action="https://www.google.com/search">
+        <!-- Google 検索フォーム -->
+        <div class="search-section">
             <a href="https://www.google.com/">
-                <img src="google.png" alt="Google">
+                <img src="google.png" alt="Google" class="search-logo">
             </a>
-            <input type="text" name="q" size="70" maxlength="255" value="">
-            <input type="hidden" name="ie" value="net教会">
-            <input type="submit" name="btnG" value="検索">
-        </form>
+            <form method="get" action="https://www.google.com/search">
+                <input type="hidden" name="ie" value="net教会">
+                <div class="search-row">
+                    <input type="text" name="q" class="search-input" maxlength="255" placeholder="Googleで検索">
+                    <input type="submit" name="btnG" value="検索">
+                </div>
+            </form>
+        </div>
         <img src="mma_r.gif">
         <span style="font-size: 1.13em; color: #004000; font-family: ＭＳ Ｐゴシック">信者は、Yahoo! を信仰しなさい。</span>
-        <!-- Begin Yahoo Search Form -->
-        <form action="https://search.yahoo.co.jp/search" method="get" style="margin:0;padding:0;">
+        <!-- Yahoo! 検索フォーム -->
+        <div class="search-section">
             <a href="https://www.yahoo.co.jp/">
-                <img src="yahoo.png" alt="Yahoo! JAPAN" style="border:none;vertical-align:middle;padding:0;border:0;">
+                <img src="yahoo.png" alt="Yahoo! JAPAN" class="search-logo">
             </a>
-            <input type="text" name="p" size="70">
-            <input type="hidden" name="fr" value="yssw">
-            <input type="hidden" name="ei" value="net教会">
-            <input type="submit" value="検索" style="margin:0;">
-        </form>
-        <!-- End Yahoo! Search Form -->
+            <form action="https://search.yahoo.co.jp/search" method="get">
+                <input type="hidden" name="fr" value="yssw">
+                <input type="hidden" name="ei" value="net教会">
+                <div class="search-row">
+                    <input type="text" name="p" class="search-input" placeholder="Yahoo!で検索">
+                    <input type="submit" value="検索">
+                </div>
+            </form>
+        </div>
         <br>
         <hr>
         <img src="mma_y.gif">net教会BGM　-NSC-SC-1903
