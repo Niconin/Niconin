@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="広く浅く色んなモノが好きな底辺うp主にこにんのホームページです。">
+  <title>にこにんのホームページ☆</title>
+  <link rel="icon" href="favicon.png">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300&display=swap" rel="stylesheet">
+
+  <style>
+    /* 全体設定 */
+    :root {
+      --main-green: #008000;
+      --content-width: 500px;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Kiwi Maru', serif;
+      /* 背景画像を画面いっぱいに固定 */
+      background-image: url('新2conin.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      background-repeat: no-repeat;
+      
+      /* コンテンツを画面中央に配置するためのFlexbox */
+      display: flex;
+      justify-content: center; /* 左右中央 */
+      align-items: center;     /* 上下中央 */
+    }
+
+    /* メインコンテンツエリア (旧table 500px相当) */
+    .container {
+      width: var(--content-width);
+      /* 高さを固定せず中身に合わせるか、min-heightで調整 */
+      min-height: 500px; 
+      padding: 20px;
+      box-sizing: border-box;
+      
+      /* 文字は左揃え */
+      text-align: left;
+      
+      /* 背景画像の上で文字を読みやすくするための微調整（任意） */
+      /* background-color: rgba(255, 255, 255, 0.2); */
+    }
+
+    /* ナビゲーション */
+    nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    nav li {
+      margin-bottom: 12px; /* 行間 */
+    }
+
+    a {
+      color: var(--main-green);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    s {
+      color: #666;
+      text-decoration: line-through;
+    }
+
+    /* カウンター */
+    .counter {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="container">
+    <nav>
+      <ul>
+        <li><a href="https://www.youtube.com/2conin">2coninのゆっくり実況所</a></li>
+        <li><a href="https://www.nicovideo.jp/user/126890555">公式ニコ動</a></li>
+        <li><a href="https://x.com/2conin_">公式X</a></li>
+        <li><a href="https://misskey.io/@niconin">公式Misskey</a></li>
+        <li><a href="https://www.blog.2co.jp">公式ブログ</a></li>
+        <li><s>公式アプリ</s></li>
+        <li><a href="https://www.2co.jp/world">Nicoworld公式HP</a></li>
+        <li><a href="https://www.server.2co.jp">ニシンサーバー公式HP</a></li>
+        <li><s>ドナルド教非公式HP</s></li>
+        <li><a href="x/index.html">２次元データベース</a></li>
+      </ul>
+    </nav>
+
+    <div class="counter">
+      <script src="https://counter1.fc2.com/counter.php?id=89505005"></script>
+      <noscript>
+        <img src="https://counter1.fc2.com/counter_img.php?id=89505005" alt="カウンター">
+      </noscript>
+    </div>
+  </main>
+
+  </body>
+</html>
