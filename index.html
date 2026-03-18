@@ -27,13 +27,11 @@
     }
 
     #main-container {
-      container-type: inline-size;
       width: min(500px, 100%);
       aspect-ratio: 1;
       background-size: 100% 100%;
       background-repeat: no-repeat;
       margin: 2em auto;
-      padding-inline: 8px;
       box-sizing: border-box;
       overflow: visible;
       display: flex;
@@ -42,7 +40,7 @@
 
     #main-container::before {
       content: '';
-      flex: 0 0 4.5em; /* 上3行分の余白 */
+      flex: 0 0 7.5em; /* 上5行分の余白 */
     }
 
     #link-list {
@@ -58,7 +56,7 @@
     #counter {
       text-align: center;
       margin-top: auto;
-      padding-top: 4.5em;  /* 下3行分の余白 */
+      padding-top: 6em;  /* 下4行分の余白 */
     }
   </style>
 </head>
