@@ -30,7 +30,7 @@
       container-type: inline-size;
       width: min(500px, 100%);
       aspect-ratio: 1;
-      background-image: url('新2conin.png');
+      background-image: url('01.png');
       background-size: 100% 100%;
       background-repeat: no-repeat;
       margin: 2em auto;
@@ -49,7 +49,6 @@
     #main-container::after {
       content: '';
       flex: 0 0 1.5em;   /* bottom spacer: exactly 1 line of text height */
-      margin-top: auto;  /* push to bottom edge of container */
     }
 
     #link-list {
@@ -60,6 +59,11 @@
 
     #link-list li {
       padding: 2px 0;
+    }
+
+    #counter {
+      text-align: center;
+      margin-top: auto;
     }
   </style>
 </head>
@@ -77,21 +81,19 @@
       <li><a href="https://www.server.2co.jp">ニシンサーバー公式HP</a></li>
       <li><a><s>ドナルド教非公式HP</s></a></li>
       <li><a href="x/index.html">２次元データベース</a></li>
-      <li>
-        <div style="text-align: center">
-          <!-- FC2カウンター ここから -->
-          <script type="text/javascript" src="https://counter1.fc2.com/counter.php?id=89505005"></script>
-          <noscript>
-            <img src="https://counter1.fc2.com/counter_img.php?id=89505005" alt="">
-          </noscript>
-          <!-- FC2カウンター ここまで -->
-        </div>
-      </li>
     </ul>
+    <div id="counter">
+      <!-- FC2カウンター ここから -->
+      <script type="text/javascript" src="https://counter1.fc2.com/counter.php?id=89505005"></script>
+      <noscript>
+        <img src="https://counter1.fc2.com/counter_img.php?id=89505005" alt="">
+      </noscript>
+      <!-- FC2カウンター ここまで -->
+    </div>
   </div>
   <script>
     (function () {
-      var imgs = ['00.png','01.png','02.png','03.png','04.png','05.png','06.png'];
+      var imgs = ['01.png','02.png','03.png','04.png','05.png','06.png','07.png'];
       var i = Math.floor(Math.random() * imgs.length);
       document.getElementById('main-container').style.backgroundImage = "url('" + imgs[i] + "')";
     })();

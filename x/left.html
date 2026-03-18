@@ -18,46 +18,67 @@
       background: #d4edda;
     }
 
+    /* ── PORTRAIT (sidebar) default layout ── */
     .nav-wrap {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
+      flex-direction: row;
       height: 100%;
-      padding: 6px 4px;
-      gap: 4px;
       border-right: 2px solid #7bbf8e;
+      overflow: hidden;
     }
 
+    /* Vertical title on the left */
     h1 {
-      font-size: 12px;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-size: clamp(12px, 2vh, 18px);
       margin: 0;
+      padding: 6px 3px;
+      flex-shrink: 0;
+      white-space: nowrap;
       text-align: center;
-      overflow-wrap: break-word;
-      word-break: break-all;
-      line-height: 1.3;
+      line-height: 1.2;
     }
 
+    /* Divider between h1 and links */
+    .nav-divider {
+      width: 1px;
+      background: #7bbf8e;
+      flex-shrink: 0;
+    }
+
+    /* Links fill remaining width */
     nav {
-      width: 100%;
+      flex: 1;
+      min-width: 0;
+      container-type: inline-size;
     }
 
     nav ul {
       list-style: none;
       margin: 0;
-      padding: 0;
+      padding: 2px 0;
       display: flex;
       flex-direction: column;
+      height: 100%;
+      justify-content: space-evenly;
       align-items: stretch;
-      gap: 3px;
+    }
+
+    nav ul li {
+      flex: 1;
+      display: flex;
+      align-items: center;
     }
 
     nav ul li a {
       display: block;
-      font-size: 14px;
-      padding: 7px 4px;
+      width: 100%;
+      font-size: clamp(9px, 2cqi, 13px);
+      padding: 2px 2px;
       text-align: center;
       white-space: nowrap;
+      overflow: hidden;
       text-decoration: none;
     }
 
@@ -65,45 +86,53 @@
       background: #b3d9be;
     }
 
-    /* Top-bar mode: iframe is wider than tall (landscape orientation) */
+    /* ── LANDSCAPE (top bar) two-row layout ── */
     @media (orientation: landscape) {
       .nav-wrap {
-        flex-direction: row;
-        justify-content: center;
-        align-items: center;
-        padding: 0 8px;
-        gap: 8px;
+        flex-direction: column;
         border-right: none;
         border-bottom: 2px solid #7bbf8e;
+        overflow: hidden;
       }
 
       h1 {
+        writing-mode: horizontal-tb;
+        font-size: clamp(11px, 1.6vw, 15px);
         white-space: nowrap;
-        flex: 0 1 auto;
-        min-width: 0;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 35%;
-        font-size: 14px;
-        overflow-wrap: normal;
-        word-break: normal;
+        text-align: center;
+        padding: 3px 8px 1px;
+        flex-shrink: 0;
+        line-height: 1.2;
+      }
+
+      .nav-divider {
+        display: none;
       }
 
       nav {
-        width: auto;
-        flex-shrink: 0;
+        flex: 1;
+        min-height: 0;
+        container-type: inline-size;
       }
 
       nav ul {
         flex-direction: row;
+        height: 100%;
+        justify-content: space-evenly;
         align-items: center;
-        gap: 4px;
-        flex-wrap: nowrap;
+        padding: 0 4px;
+      }
+
+      nav ul li {
+        flex: 1;
+        justify-content: center;
       }
 
       nav ul li a {
-        padding: 5px 10px;
-        font-size: 16px;
+        font-size: clamp(11px, 2cqi, 16px);
+        padding: 3px 4px;
         white-space: nowrap;
       }
     }
@@ -112,6 +141,7 @@
 <body>
   <div class="nav-wrap">
     <h1>にこにんの2次元アーカイブス</h1>
+    <div class="nav-divider"></div>
     <nav>
       <ul>
         <li><a href="okk.html" target="_top">続刊</a></li>
