@@ -6,17 +6,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>左</title>
   <style>
-    body {
-      margin: 0;
-      padding: 4px;
+    *, *::before, *::after {
       box-sizing: border-box;
-      text-align: center;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #d4edda;
+    }
+
+    .nav-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100%;
+      padding: 6px 4px;
+      gap: 4px;
+      border-right: 2px solid #7bbf8e;
     }
 
     h1 {
-      font-size: clamp(0.65rem, 2.5vw, 1.5rem);
-      margin: 0.2em 0;
+      font-size: 12px;
+      margin: 0;
+      text-align: center;
       overflow-wrap: break-word;
+      word-break: break-all;
+      line-height: 1.3;
+    }
+
+    nav {
+      width: 100%;
     }
 
     nav ul {
@@ -25,31 +48,76 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
       gap: 2px;
     }
 
     nav ul li a {
       display: block;
-      font-size: clamp(0.75rem, 2vw, 1rem);
-      padding: 2px 4px;
+      font-size: 12px;
+      padding: 3px 4px;
       text-align: center;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    nav ul li a:hover {
+      background: #b3d9be;
+    }
+
+    /* Top-bar mode: iframe is wider than tall (landscape orientation) */
+    @media (orientation: landscape) {
+      .nav-wrap {
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+        padding: 0 12px;
+        gap: 16px;
+        border-right: none;
+        border-bottom: 2px solid #7bbf8e;
+      }
+
+      h1 {
+        white-space: nowrap;
+        flex-shrink: 0;
+        font-size: 14px;
+        overflow-wrap: normal;
+        word-break: normal;
+      }
+
+      nav {
+        width: auto;
+      }
+
+      nav ul {
+        flex-direction: row;
+        align-items: center;
+        gap: 4px;
+        flex-wrap: nowrap;
+      }
+
+      nav ul li a {
+        padding: 4px 10px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
-  <h1>にこにんの2次元アーカイブス</h1>
-  <nav>
-    <ul>
-      <li><a href="okk.html" target="_top">続刊</a></li>
-      <li><a href="rdata.html" target="_top">ロリ</a></li>
-      <li><a href="oshi.html" target="_top">推し</a></li>
-      <li><a href="index.html" target="_top">TOP</a></li>
-      <li><a href="kami.html" target="_top">神</a></li>
-      <li><a href="hmt.html" target="_top">ハマった</a></li>
-      <li><a href="x.html" target="_top">コラム</a></li>
-    </ul>
-  </nav>
+  <div class="nav-wrap">
+    <h1>にこにんの2次元アーカイブス</h1>
+    <nav>
+      <ul>
+        <li><a href="okk.html" target="_top">続刊</a></li>
+        <li><a href="rdata.html" target="_top">ロリ</a></li>
+        <li><a href="oshi.html" target="_top">推し</a></li>
+        <li><a href="index.html" target="_top">TOP</a></li>
+        <li><a href="kami.html" target="_top">神</a></li>
+        <li><a href="hmt.html" target="_top">ハマった</a></li>
+        <li><a href="x.html" target="_top">コラム</a></li>
+      </ul>
+    </nav>
+  </div>
 </body>
 
 </html>

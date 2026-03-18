@@ -27,16 +27,29 @@
     }
 
     #main-container {
+      container-type: inline-size;
       width: min(500px, 100%);
       aspect-ratio: 1;
       background-image: url('新2conin.png');
       background-size: 100% 100%;
       background-repeat: no-repeat;
       margin: 2em auto;
-      padding-top: 96px;
       padding-inline: 8px;
-      padding-bottom: 8px;
       box-sizing: border-box;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #main-container::before {
+      content: '';
+      flex: 0 0 19.2cqw; /* top spacer: 19.2% of container width ≈ 96px at 500px */
+    }
+
+    #main-container::after {
+      content: '';
+      flex: 1;             /* bottom spacer: fills all remaining space */
+      min-height: 8cqw;   /* minimum bottom whitespace (8% of container width) */
     }
 
     #link-list {
