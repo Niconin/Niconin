@@ -25,26 +25,20 @@
       height: 100%;
       border-right: 2px solid #7bbf8e;
       overflow: hidden;
+      align-items: flex-start;
     }
 
     /* Vertical title on the left */
     h1 {
       writing-mode: vertical-rl;
       text-orientation: mixed;
-      font-size: clamp(12px, 2vh, 18px);
+      font-size: clamp(16px, 3vh, 28px);
       margin: 0;
-      padding: 6px 3px;
+      padding: 4px 2px;
       flex-shrink: 0;
       white-space: nowrap;
-      text-align: center;
+      text-align: start;
       line-height: 1.2;
-    }
-
-    /* Divider between h1 and links */
-    .nav-divider {
-      width: 1px;
-      background: #7bbf8e;
-      flex-shrink: 0;
     }
 
     /* Links fill remaining width */
@@ -60,22 +54,15 @@
       padding: 2px 0;
       display: flex;
       flex-direction: column;
-      height: 100%;
-      justify-content: space-evenly;
+      justify-content: flex-start;
       align-items: stretch;
-    }
-
-    nav ul li {
-      flex: 1;
-      display: flex;
-      align-items: center;
     }
 
     nav ul li a {
       display: block;
       width: 100%;
-      font-size: clamp(9px, 2cqi, 13px);
-      padding: 2px 2px;
+      font-size: clamp(10px, 2.5cqi, 15px);
+      padding: 3px 2px;
       text-align: center;
       white-space: nowrap;
       overflow: hidden;
@@ -141,7 +128,6 @@
 <body>
   <div class="nav-wrap">
     <h1>にこにんの2次元アーカイブス</h1>
-    <div class="nav-divider"></div>
     <nav>
       <ul>
         <li><a href="okk.html" target="_top">続刊</a></li>
