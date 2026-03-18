@@ -10,6 +10,13 @@
     table.data-table th, table.data-table td { border: 1px solid; }
     .row-green { background-color: #DDFFDD; }
     .row-ddeeff { background-color: #DDEEFF; }
+    /* Responsive: body font scales with viewport */
+    body { font-size: clamp(14px, 2vw, 18px); overflow-x: auto; }
+    /* Images in tables scale down on narrow screens */
+    table.data-table img { max-width: 80px; width: auto; height: auto; }
+    @media (max-width: 599px) {
+      table.data-table img { max-width: 60px; }
+    }
   </style>
 </head>
 

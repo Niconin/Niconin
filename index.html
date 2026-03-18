@@ -48,8 +48,8 @@
 
     #main-container::after {
       content: '';
-      flex: 1;             /* bottom spacer: fills all remaining space */
-      min-height: 8cqw;   /* minimum bottom whitespace (8% of container width) */
+      flex: 0 0 1.5em;   /* bottom spacer: exactly 1 line of text height */
+      margin-top: auto;  /* push to bottom edge of container */
     }
 
     #link-list {
@@ -89,6 +89,13 @@
       </li>
     </ul>
   </div>
+  <script>
+    (function () {
+      var imgs = ['00.png','01.png','02.png','03.png','04.png','05.png','06.png'];
+      var i = Math.floor(Math.random() * imgs.length);
+      document.getElementById('main-container').style.backgroundImage = "url('" + imgs[i] + "')";
+    })();
+  </script>
 </body>
 
 </html>

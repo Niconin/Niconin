@@ -49,13 +49,13 @@
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      gap: 2px;
+      gap: 3px;
     }
 
     nav ul li a {
       display: block;
-      font-size: 12px;
-      padding: 3px 4px;
+      font-size: 14px;
+      padding: 7px 4px;
       text-align: center;
       white-space: nowrap;
       text-decoration: none;
@@ -71,15 +71,19 @@
         flex-direction: row;
         justify-content: center;
         align-items: center;
-        padding: 0 12px;
-        gap: 16px;
+        padding: 0 8px;
+        gap: 8px;
         border-right: none;
         border-bottom: 2px solid #7bbf8e;
       }
 
       h1 {
         white-space: nowrap;
-        flex-shrink: 0;
+        flex: 0 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 35%;
         font-size: 14px;
         overflow-wrap: normal;
         word-break: normal;
@@ -87,6 +91,7 @@
 
       nav {
         width: auto;
+        flex-shrink: 0;
       }
 
       nav ul {
@@ -97,8 +102,9 @@
       }
 
       nav ul li a {
-        padding: 4px 10px;
-        font-size: 14px;
+        padding: 5px 10px;
+        font-size: 16px;
+        white-space: nowrap;
       }
     }
   </style>
