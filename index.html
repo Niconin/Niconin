@@ -26,6 +26,7 @@
       margin: 0;
     }
 
+    /* ===== PC・共通スタイル ===== */
     #main-container {
       width: min(500px, 100%);
       aspect-ratio: 1;
@@ -35,19 +36,16 @@
       margin: 2em auto;
       box-sizing: border-box;
       overflow: visible;
-      display: flex;
-      flex-direction: column;
-    }
-
-    #main-container::before {
-      content: '';
-      flex: 0 0 7.5em; /* 上5行分の余白 */
+      position: relative; /* 子要素の絶対位置配置の基準 */
     }
 
     #link-list {
       list-style: none;
       margin: 0;
       padding: 0;
+      position: absolute;
+      top: 7.5em; /* 上5行分の余白（PC） */
+      width: 100%;
     }
 
     #link-list li {
@@ -56,8 +54,21 @@
 
     #counter {
       text-align: center;
-      margin-top: auto;
-      padding-top: 6em;  /* 下4行分の余白 */
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      padding-top: 6em; /* 下4行分の余白（PC） */
+    }
+
+    /* ===== モバイルビュー（600px以下） ===== */
+    @media (max-width: 600px) {
+      #link-list {
+        top: 10.5em; /* 上7行分の余白（+2行） */
+      }
+
+      #counter {
+        padding-top: 3em; /* 下2行分の余白（-2行） */
+      }
     }
   </style>
 </head>
