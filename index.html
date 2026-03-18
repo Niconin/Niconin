@@ -42,18 +42,13 @@
 
     #main-container::before {
       content: '';
-      flex: 0 0 19.2cqw; /* top spacer: 19.2% of container width ≈ 96px at 500px */
-    }
-
-    #main-container::after {
-      content: '';
-      flex: 0 0 1.5em;   /* bottom spacer: exactly 1 line of text height */
+      flex: 0 0 4.5em; /* top spacer: 3 lines above links */
     }
 
     #link-list {
       list-style: none;
       margin: 0;
-      padding: 1.5em 0 0;  /* extra top line of whitespace above the links */
+      padding: 0;
     }
 
     #link-list li {
@@ -63,7 +58,7 @@
     #counter {
       text-align: center;
       margin-top: auto;
-      padding-top: 5em;  /* approx 3 lines above the counter */
+      padding-top: 3em;  /* 2 lines below the link list */
     }
   </style>
 </head>
