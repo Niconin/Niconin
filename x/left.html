@@ -18,7 +18,7 @@
       background: #d4edda;
     }
 
-    /* ── PORTRAIT (sidebar) default layout ── */
+    /* ── ポートレート（サイドバー）デフォルトレイアウト ── */
     .nav-wrap {
       display: flex;
       flex-direction: row;
@@ -28,7 +28,7 @@
       align-items: flex-start;
     }
 
-    /* Vertical title on the left */
+    /* 左側の縦書きタイトル */
     h1 {
       writing-mode: vertical-rl;
       text-orientation: mixed;
@@ -41,7 +41,7 @@
       line-height: 1.2;
     }
 
-    /* Links fill remaining width */
+    /* リンクエリアが残りの幅を占める */
     nav {
       flex: 1;
       min-width: 0;
@@ -75,7 +75,7 @@
       background: #b3d9be;
     }
 
-    /* ── LANDSCAPE (top bar) two-row layout ── */
+    /* ── ランドスケープ（トップバー）二段レイアウト ── */
     @media (orientation: landscape) {
       .nav-wrap {
         flex-direction: column;
@@ -104,28 +104,33 @@
         flex: 1;
         min-height: 0;
         container-type: inline-size;
+        overflow: hidden;
       }
 
       nav ul {
         flex-direction: row;
+        flex-wrap: wrap;
         height: 100%;
         justify-content: center;
         align-items: center;
-        padding: 0 4px;
-        gap: 4px;
+        padding: 0 2px;
+        gap: 2px;
       }
 
       nav ul li {
-        flex: 1;
+        flex: 1 0 auto;
+        display: flex;
         justify-content: center;
+        min-width: 0;
       }
 
       nav ul li a {
-        font-size: clamp(12px, 2.8cqi, 16px); /* h2レベル：タイトルより小さい */
+        font-size: clamp(14px, 3.5vw, 20px); /* h1相当：タイトルより小さい */
         font-weight: bold;
-        padding: 3px 4px;
-        white-space: nowrap;
+        padding: 2px 4px;
+        white-space: normal;
         text-align: center;
+        overflow-wrap: break-word;
       }
     }
   </style>
