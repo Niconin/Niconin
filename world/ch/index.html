@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html>
+<html lang="ja">
 
 <head>
     <meta charset="UTF-8">
@@ -12,12 +12,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300" rel="stylesheet">
     <style>
-    body      { color: #008000; text-decoration: none; overflow-x: hidden; }
-    body      { font-family: 'Kiwi Maru', serif; }
-    a:link    { color: #008000; text-decoration: none; }
-    a:visited { color: #008000; text-decoration: none; }
+    body      { color: #008000; font-family: 'Kiwi Maru', serif; overflow-x: hidden; }
+    a:link, a:visited { color: #008000; text-decoration: none; }
     a:hover   { color: #008000; text-decoration: underline; }
     img       { max-width: 100%; height: auto; }
+    .page-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 16px;
+      box-sizing: border-box;
+      text-align: center;
+    }
     .video-wrap {
       position: relative;
       padding-bottom: 56.25%; /* 16:9 */
@@ -35,7 +40,7 @@
    </style>
   </head>
   <body>
-   <div style="text-align: center">
+   <div class="page-wrap">
     <a href="https://www.youtube.com/@2conin"><img src="2conin.png" width="583" height="65" alt="2coninのゆっくり実況所"></a>
     <br>2coninのゆっくり実況所へようこそ！
     <hr>
@@ -54,11 +59,9 @@
     </div>
     <hr>
     ニコ動ch:「コメ付き総本山」など↓<br>
-    <div style="max-width: 640px; margin: 0 auto;">
-      <!-- NicoVideo埋め込み：16:9アスペクト比 -->
-      <div class="video-wrap">
-        <iframe src="https://embed.nicovideo.jp/watch/sm41684194" title="NicoVideo" allowfullscreen></iframe>
-      </div>
+    <!-- NicoVideo埋め込み：16:9アスペクト比 -->
+    <div class="video-wrap">
+      <iframe src="https://embed.nicovideo.jp/watch/sm41684194" title="NicoVideo" allowfullscreen></iframe>
     </div>
     <hr>
     動画見てください！<br>
