@@ -3,25 +3,159 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>左</title>
   <style>
-  h1 { 
-  font-size: clamp(1rem, 4vw, 2rem); 
-  }
-</style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #d4edda;
+    }
+
+    a, a:visited {
+      color: #005500;
+      text-decoration: none;
+    }
+
+    a:hover {
+      background: #b3d9be;
+    }
+
+    /* ── サイドバーレイアウト（デスクトップ：幅600px以上） ── */
+    .nav-wrap {
+      display: flex;
+      flex-direction: row;
+      height: 100%;
+      border-right: 2px solid #7bbf8e;
+      overflow: hidden;
+      align-items: flex-start;
+    }
+
+    /* 縦書きタイトル */
+    h1 {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-size: clamp(18px, 4vh, 32px);
+      margin: 0;
+      padding: 4px 2px;
+      flex-shrink: 0;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+
+    /* ナビゲーションエリア */
+    nav {
+      flex: 1;
+      min-width: 0;
+      container-type: inline-size;
+    }
+
+    nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 2px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    nav ul li a {
+      display: block;
+      width: 100%;
+      font-size: clamp(16px, 8cqi, 24px); /* h2相当サイズ */
+      font-weight: bold;
+      padding: 3px 2px;
+      text-align: center;
+      white-space: normal;
+      overflow-wrap: break-word;
+    }
+
+    /* ── トップバーレイアウト（モバイル：幅600px未満） ── */
+    /* iframeの向き（幅 > 高さ）で切り替え */
+    @media (orientation: landscape) {
+      .nav-wrap {
+        flex-direction: column;
+        border-right: none;
+        border-bottom: 2px solid #7bbf8e;
+        align-items: stretch;
+      }
+
+      /* タイトル行：横書き・1行に収める */
+      h1 {
+        writing-mode: horizontal-tb;
+        font-size: clamp(12px, 2vw, 16px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+        padding: 2px 8px;
+        flex-shrink: 0;
+        line-height: 1.3;
+      }
+
+      nav {
+        flex: 1;
+        min-height: 0;
+        container-type: normal;
+        overflow: hidden;
+      }
+
+      /* リンク行：横並び・折り返しなし・均等配置 */
+      nav ul {
+        flex-direction: row;
+        flex-wrap: nowrap; /* 折り返しを禁止してリンクを必ず1行に表示 */
+        height: 100%;
+        justify-content: space-evenly;
+        align-items: center;
+        padding: 0;
+        gap: 0;
+      }
+
+      nav ul li {
+        flex: 1 1 0; /* 均等に幅を分配 */
+        min-width: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+      }
+
+      nav ul li a {
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: clamp(11px, 3vw, 14px); /* 幅に応じてフォントサイズを調整 */
+        font-weight: bold;
+        padding: 2px 1px;
+        white-space: nowrap; /* テキストの折り返し禁止 */
+        overflow: hidden;
+        text-overflow: ellipsis; /* はみ出す場合は省略記号 */
+      }
+    }
+  </style>
 </head>
+
 <body>
-  <div align="center">
-  <h1>にこにんの2次元アーカイブス</h1>
-  <table cellpadding="10%">
-    <td><a href="okk.html" target="_top">続刊</a></td>
-    <td><a href="rdata.html" target="_top">ロリ</a></td>
-    <td><a href="oshi.html" target="_top">推し</a></td>
-    <td><a href="index.html" target="_top">TOP</a></td>
-    <td><a href="kami.html" target="_top">神</a></td>
-    <td><a href="hmt.html" target="_top">ハマった</a></td>
-    <td><a href="x.html" target="_top">コラム</a></td>
-</table>
+  <div class="nav-wrap">
+    <h1>にこにんの2次元アーカイブス</h1>
+    <nav>
+      <ul>
+        <li><a href="okk.html" target="_top">続刊</a></li>
+        <li><a href="rdata.html" target="_top">ロリ</a></li>
+        <li><a href="oshi.html" target="_top">推し</a></li>
+        <li><a href="index.html" target="_top">TOP</a></li>
+        <li><a href="kami.html" target="_top">神</a></li>
+        <li><a href="hmt.html" target="_top">ハマった</a></li>
+        <li><a href="x.html" target="_top">コラム</a></li>
+      </ul>
+    </nav>
+  </div>
 </body>
 
 </html>

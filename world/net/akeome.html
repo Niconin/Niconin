@@ -3,36 +3,54 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>あけおめことよろ</title>
+  <style>
+    /* ページ全体のレイアウト */
+    body {
+      margin: 0;
+      padding: 0;
+    }
+    /* 中央揃えコンテナ */
+    .page-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 16px;
+      box-sizing: border-box;
+      text-align: center;
+      overflow-x: hidden;  /* 横スクロール防止（bodyではなくここで指定）*/
+    }
+    img { max-width: 100%; height: auto; }
+    /* 大きすぎるフォントをh1相当(2em)に縮小 */
+    span[style*="font-size: 5em"] { font-size: 2em !important; }
+  </style>
 </head>
 
 <body background="1.png">
   <script>
     alert('2022年ありがとうございました！2023年もよろしくおねがいします！');
   </script>
-  <div style="text-align: center">
+  <!-- 表示領域：最大幅800px、中央揃え -->
+  <div class="page-wrap">
     <img src="あけおめ.png" alt="あけおめことよろ">
     <br>
-    <font size="10" color="#004000" face="ＭＳ Ｐ明朝">あけことサイトへようこそ。</font>
+    <span style="font-size: 5em; color: #004000; font-family: 'ＭＳ Ｐ明朝'">あけことサイトへようこそ。</span>
     <marquee behavior="alternate" direction="left" height="300">
       <marquee direction="up">
-        <img src="ことよろ.png">
+        <img src="ことよろ.png" alt="ことよろ">
       </marquee>
     </marquee>
     <hr>
-    <b>元になったサイトたち
-      <br>
-      <a href="https://www.2co.jp/world/ch/">2coninのゆっくり実況所公式クイックアクセスサイト</a>
-      <br>
-      <a href="https://www.2co.jp/world/net/">net教会</a>
-      <br>
-      <a href="https://www.mcdonald.jp/">ドナルド・マクドナルドを信仰する会(現名称:ドナルド教非公式ホームページ)</a>
-      <br>
-      <h4>現在の時間
-        <br>
-        <span id="viewTime"></span>
-    </b>
-    </h4>
+    <b>元になったサイトたち</b>
+    <br>
+    <a href="../ch/">2coninのゆっくり実況所公式クイックアクセスサイト</a>
+    <br>
+    <a href="./">net教会</a>
+    <br>
+    <a href="https://www.mcdonald.jp/">ドナルド・マクドナルドを信仰する会(現名称:ドナルド教非公式ホームページ)</a>
+    <br>
+    <h4>現在の時間</h4>
+    <span id="viewTime"></span>
     <script type="text/javascript">
       timer = setInterval('clock()', 1000); //時刻の更新
 
@@ -57,7 +75,7 @@
         return s;
       }
     </script>
-    <font color="#808080">Nicoworld Project</font>
+    <span style="color: #808080">Nicoworld Project</span>
   </div>
 </body>
 

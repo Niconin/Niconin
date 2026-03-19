@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="広く浅く色んなモノが好きな底辺うp主にこにんのホームページです。">
   <title>にこにんのホームページ☆</title>
   <link rel="icon" href="favicon.png">
@@ -10,13 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com">
   <link href="https://fonts.googleapis.com/css2?family=Kiwi+Maru:wght@300" rel="stylesheet">
   <style>
-  <!--
-    a:link {
-      color: #008000;
-      text-decoration: none;
-    }
-
-    a:visited {
+    a:link, a:visited {
       color: #008000;
       text-decoration: none;
     }
@@ -28,94 +23,82 @@
 
     body {
       font-family: 'Kiwi Maru', serif;
+      margin: 0;
+    }
+
+    /* ===== PC・共通スタイル ===== */
+    #main-container {
+      width: min(500px, 100%);
+      aspect-ratio: 1;
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 2em auto;
+      box-sizing: border-box;
+      overflow: visible;
+      position: relative; /* 子要素の絶対位置配置の基準 */
+    }
+
+    #link-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      position: absolute;
+      top: 7.5em; /* 上5行分の余白（PC） */
+      width: 100%;
+    }
+
+    #link-list li {
+      padding: 2px 0;
+    }
+
+    #counter {
+      text-align: center;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      padding-top: 7.5em; /* 下5行分の余白（PC） */
+    }
+
+    /* ===== モバイルビュー（600px以下） ===== */
+    @media (max-width: 600px) {
+      #counter {
+        padding-top: 6em; /* 下4行分の余白（モバイル） */
+      }
     }
   </style>
 </head>
 
 <body>
-  <br>
-  <br>
-  <table background="新2conin.png" width="500" height="500" align="center">
-    <tr>
-      <td>
-        <br>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <br>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <br>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <br>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://www.youtube.com/2conin">2coninのゆっくり実況所</a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://www.nicovideo.jp/user/126890555">公式ニコ動</a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://x.com/2conin_">公式X</a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://misskey.io/@niconin">公式Misskey</a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://www.blog.2co.jp">公式ブログ</a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a><s>公式アプリ</s></a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://www.2co.jp/world">Nicoworld公式HP</a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a href="https://www.server.2co.jp">ニシンサーバー公式HP</a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a><s>ドナルド教非公式HP</s></a>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <a href="x/index.html">２次元データベース</a>
-      </td>
-    </tr>
-  <tr><td>
-  <div style="text-align: center">
-    <!-- FC2カウンター ここから -->
-    <script language="javascript" type="text/javascript" src="https://counter1.fc2.com/counter.php?id=89505005"></script>
-    <noscript>
-      <img src="https://counter1.fc2.com/counter_img.php?id=89505005">
-    </noscript>
-    <!-- FC2カウンター ここまで -->
-  </div></td></tr>
-</table>
+  <div id="main-container">
+    <ul id="link-list">
+      <li><a href="https://www.youtube.com/2conin">2coninのゆっくり実況所</a></li>
+      <li><a href="https://www.nicovideo.jp/user/126890555">公式ニコ動</a></li>
+      <li><a href="https://x.com/2conin_">公式X</a></li>
+      <li><a href="https://misskey.io/@niconin">公式Misskey</a></li>
+      <li><a href="https://www.blog.2co.jp">公式ブログ</a></li>
+      <li><a><s>公式アプリ</s></a></li>
+      <li><a href="world/">Nicoworld公式HP</a></li>
+      <li><a href="https://www.server.2co.jp">ニシンサーバー公式HP</a></li>
+      <li><a><s>ドナルド教非公式HP</s></a></li>
+      <li><a href="x/index.html">２次元データベース</a></li>
+    </ul>
+    <div id="counter">
+      <!-- FC2カウンター ここから -->
+      <script type="text/javascript" src="https://counter1.fc2.com/counter.php?id=89505005"></script>
+      <noscript>
+        <img src="https://counter1.fc2.com/counter_img.php?id=89505005" alt="">
+      </noscript>
+      <!-- FC2カウンター ここまで -->
+    </div>
+  </div>
+  <script>
+    (function () {
+      var imgs = ['01.png','02.png','03.png','04.png','05.png','06.png','07.png'];
+      var i = Math.floor(Math.random() * imgs.length);
+      document.getElementById('main-container').style.backgroundImage = "url('" + imgs[i] + "')";
+    })();
+  </script>
 </body>
 
 </html>

@@ -3,68 +3,91 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="description" cntent="Welcome to Nicoworld Official Site.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Welcome to Nicoworld Official Site.">
   <title>Nicoworld</title>
   <link rel="icon" href="favicon.png">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    .page-wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 16px;
+      box-sizing: border-box;
+      text-align: center;
+    }
+    img { max-width: 100%; height: auto; }
+    .site-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin: 16px 0;
+    }
+    @media (min-width: 480px) {
+      .site-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    .site-grid a {
+      display: block;
+      text-align: center;
+    }
+    .site-grid img {
+      width: 100%;
+      height: auto;
+    }
+  </style>
 </head>
 
 <body>
-  <div style="text-align: center">
+  <div class="page-wrap">
     <img src="Nicoworld.png" alt="Nicoworld">
     <hr>
-    <font color="#008000">
+    <span style="color: #008000">
       <b>Nicoworld公式サイトへようこそ!
-    </font>
+    </span>
     <br>
-    <font color="#008000">ここは
-      <big>Niconin</big>が作成したサイトのポータルサイトです。
-    </font>
+    <span style="color: #008000">ここは
+      <span style="font-size: 1.2em">Niconin</span>が作成したサイトのポータルサイトです。
+    </span>
     <br>
-    <font color="#008000">決してすべての人が満足できるというわけではありません。
+    <span style="color: #008000">決してすべての人が満足できるというわけではありません。
       </b>
-    </font>
+    </span>
     <br>
     <hr>
-    <font color="#008000">今までに作ったサイトたち</font>
+    <span style="color: #008000">今までに作ったサイトたち</span>
     <br>
-    <table align="center">
-      <tr align="center">
-        <td>
-          <a href="https://www.2co.jp/world/ch/">
-            <img src="動画見てねー.png" alt="2coninのゆっくり実況所公式ホームページ">
-          </a>
-        </td>
-        <td>
-          <a href="https://www.2co.jp/world/net/">
-            <img src="net教会.png" alt="net教会公式ホームページ">
-          </a>
-        </td>
-      </tr>
-      <tr align="center">
-        <td>
-          <a href="https://www.mcdonald.jp/">
-            <img src="バナー.jpg" alt="ドナルド教非公式ホームページ">
-          </a>
-        </td>
-        <td>
-          <a href="https://www.server.2co.jp/">
-            <img src="nishinserver.png" alt="ニシンサーバー公式ホームページ">
-          </a>
-        </td>
-      </tr>
-    </table>
+    <div class="site-grid">
+      <a href="ch/">
+        <img src="動画見てねー.png" alt="2coninのゆっくり実況所公式ホームページ">
+      </a>
+      <a href="net/">
+        <img src="net教会.png" alt="net教会公式ホームページ">
+      </a>
+      <a href="https://www.mcdonald.jp/">
+        <img src="バナー.jpg" alt="ドナルド教非公式ホームページ">
+      </a>
+      <a href="https://www.server.2co.jp/">
+        <img src="nishinserver.png" alt="ニシンサーバー公式ホームページ">
+      </a>
+    </div>
     <hr>
-    <font color="#008000">公式アプリをダウンロード</font>
+    <span style="color: #008000">公式アプリをダウンロード</span>
     <br>
     <a
       href='https://play.google.com/store/apps/details?id=www.nicoworld.net&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'>
-      <img alt='Google Play で手に入れよう' src='google-play-badge.png' />
+      <img alt='Google Play で手に入れよう' src='google-play-badge.png' style="max-width: 200px;" />
     </a>
     <hr>
-    <font color="#008000">現在の時間
+    <span style="color: #008000">現在の時間
       <br>
       <span id="viewTime"></span>
-    </font>
+    </span>
     <script type="text/javascript">
       timer = setInterval('clock()', 1000); //時刻の更新
 
@@ -90,8 +113,7 @@
       }
     </script>
     <br>
-    <br>
-    <font color="#808080">Nicoworld Project</font>
+    <span style="color: #808080">Nicoworld Project</span>
   </div>
 </body>
 
