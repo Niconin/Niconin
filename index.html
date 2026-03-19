@@ -53,23 +53,13 @@
     }
 
     #counter {
-      text-align: left;
-      position: absolute;
-      bottom: 1.5em; /* カウンター下に1行分の余白 */
-      width: 100%;
-      padding-top: 7.5em; /* 下5行分の余白（PC） */
-      pointer-events: none; /* リンクリストのクリックを妨げない */
+      width: min(500px, 100%);
+      margin: 0 auto;
+      text-align: right;
     }
 
-    #counter > * {
-      pointer-events: auto; /* カウンター自体はクリック可能 */
-    }
-
-    /* ===== モバイルビュー（600px以下） ===== */
-    @media (max-width: 600px) {
-      #counter {
-        padding-top: 6em; /* 下4行分の余白（モバイル） */
-      }
+    #counter p {
+      margin: 0;
     }
   </style>
 </head>
@@ -88,14 +78,15 @@
       <li><a><s>ドナルド教非公式HP</s></a></li>
       <li><a href="x/">２次元データベース</a></li>
     </ul>
-    <div id="counter">
-      <!-- FC2カウンター ここから -->
-      <script type="text/javascript" src="https://counter1.fc2.com/counter.php?id=89505005"></script>
-      <noscript>
-        <img src="https://counter1.fc2.com/counter_img.php?id=89505005" alt="">
-      </noscript>
-      <!-- FC2カウンター ここまで -->
-    </div>
+  </div>
+  <div id="counter">
+    <!-- FC2カウンター ここから -->
+    <script type="text/javascript" src="https://counter1.fc2.com/counter.php?id=89505005"></script>
+    <noscript>
+      <img src="https://counter1.fc2.com/counter_img.php?id=89505005" alt="">
+    </noscript>
+    <!-- FC2カウンター ここまで -->
+    <p>現在の閲覧者数:</p>
   </div>
   <script>
     (function () {
