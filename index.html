@@ -33,7 +33,7 @@
       background-size: contain;
       background-position: center;
       background-repeat: no-repeat;
-      margin: 2em auto;
+      margin: 2em auto 0;
       box-sizing: border-box;
       overflow: visible;
       position: relative; /* 子要素の絶対位置配置の基準 */
@@ -58,8 +58,9 @@
       text-align: right;
     }
 
-    #counter p {
-      margin: 0;
+    #counter #visitor-label {
+      font-size: 0.6em;
+      vertical-align: middle;
     }
   </style>
 </head>
@@ -84,7 +85,7 @@
     <script type="text/javascript" src="https://counter1.fc2.com/counter.php?id=89505005"></script>
     <noscript>
       <img src="https://counter1.fc2.com/counter_img.php?id=89505005" alt="">
-    </noscript> <p>th Visitor.</p>
+    </noscript><span id="visitor-label">th Visitor.</span>
     <!-- FC2カウンター ここまで -->
   </div>
   <script>
