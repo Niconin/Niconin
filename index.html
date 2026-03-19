@@ -33,7 +33,7 @@
       background-size: contain;
       background-position: center;
       background-repeat: no-repeat;
-      margin: 2em auto;
+      margin: 2em auto 0;
       box-sizing: border-box;
       overflow: visible;
       position: relative; /* 子要素の絶対位置配置の基準 */
@@ -49,22 +49,18 @@
     }
 
     #link-list li {
-      padding: 2px 0;
+      padding: 2px 0 0 1em;
     }
 
     #counter {
-      text-align: center;
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      padding-top: 7.5em; /* 下5行分の余白（PC） */
+      width: min(500px, 100%);
+      margin: 0 auto;
+      text-align: right;
     }
 
-    /* ===== モバイルビュー（600px以下） ===== */
-    @media (max-width: 600px) {
-      #counter {
-        padding-top: 6em; /* 下4行分の余白（モバイル） */
-      }
+    #counter #visitor-label {
+      font-size: 0.6em;
+      vertical-align: middle;
     }
   </style>
 </head>
@@ -81,16 +77,16 @@
       <li><a href="world/">Nicoworld公式HP</a></li>
       <li><a href="https://www.server.2co.jp">ニシンサーバー公式HP</a></li>
       <li><a><s>ドナルド教非公式HP</s></a></li>
-      <li><a href="x/index.html">２次元データベース</a></li>
+      <li><a href="x/">２次元データベース</a></li>
     </ul>
-    <div id="counter">
-      <!-- FC2カウンター ここから -->
-      <script type="text/javascript" src="https://counter1.fc2.com/counter.php?id=89505005"></script>
-      <noscript>
-        <img src="https://counter1.fc2.com/counter_img.php?id=89505005" alt="">
-      </noscript>
-      <!-- FC2カウンター ここまで -->
-    </div>
+  </div>
+  <div id="counter">
+    <!-- FC2カウンター ここから -->
+    <script type="text/javascript" src="https://counter1.fc2.com/counter.php?id=89505005"></script>
+    <noscript>
+      <img src="https://counter1.fc2.com/counter_img.php?id=89505005" alt="">
+    </noscript><span id="visitor-label">th Visitor.</span>
+    <!-- FC2カウンター ここまで -->
   </div>
   <script>
     (function () {
