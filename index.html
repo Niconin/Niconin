@@ -57,13 +57,18 @@
       position: absolute;
       bottom: 0;
       width: 100%;
-      padding-top: 9em; /* 下6行分の余白（PC） */
+      padding-top: 7.5em; /* 下5行分の余白（PC） */
+      pointer-events: none; /* リンクリストのクリックを妨げない */
+    }
+
+    #counter > * {
+      pointer-events: auto; /* カウンター自体はクリック可能 */
     }
 
     /* ===== モバイルビュー（600px以下） ===== */
     @media (max-width: 600px) {
       #counter {
-        padding-top: 7.5em; /* 下5行分の余白（モバイル） */
+        padding-top: 6em; /* 下4行分の余白（モバイル） */
       }
     }
   </style>
